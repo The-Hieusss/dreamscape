@@ -1,7 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { models } from "../lib/ModelRegistry";
 
-const genAI = new GoogleGenerativeAI(process.env.VITE_GEMINI_API_KEY || "");
+// IMPORTANT: In Vite use import.meta.env.* not process.env.*
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+
+if (!apiKey) {
+  console.warn(
+    "[ai] Missing VITE_GEMINI_API_KEY. Add it to your .env file: VITE_GEMINI_API_KEY=YOUR_KEY"
+  );
+}
+
+const genAI = new GoogleGenerativeAI(apiKey || "");
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 export async function generateCommand(input: string) {
@@ -88,7 +97,6 @@ Examples:
 "Make horses gallop fast" =>
 { "action": "add_object", "object": { "type": "horse", "quantity": 2, "position": "random", "animation": "Walk", "speed": 0.05 } }
 
-
 When spawning multiple animals (like cows, sheep, fish), assign random Y rotation so they don’t all face the same way.
 
 IMPORTANT: Always output valid JSON only, no explanations or markdown fences.
@@ -96,14 +104,13 @@ IMPORTANT: Always output valid JSON only, no explanations or markdown fences.
 User input: "${input}"
 `;
 
+  if (!apiKey) return null;
+
   const result = await model.generateContent(prompt);
   let text = result.response.text().trim();
 
   if (text.startsWith("```")) {
-    text = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
   }
 
   try {
