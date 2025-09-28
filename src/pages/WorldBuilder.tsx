@@ -1,5 +1,4 @@
 import { useState } from "react";
-import  supabase  from "../lib/supabase";
 import SceneManager from "../components/SceneManager";
 import type { SceneObject, World } from "../lib/types";
 import { generateCommand } from "../lib/ai";
@@ -21,13 +20,13 @@ export default function WorldBuilder() {
         position:
           cmd.object.position === "random"
             ? [Math.random() * 10 - 5, 0, Math.random() * 10 - 5]
-            : cmd.object.position ?? [0, 0, 0],
+            : (cmd.object.position ?? [0, 0, 0]),
       }));
       setObjects((prev) => [...prev, ...newObjects]);
     }
 
     if (cmd.action === "modify_world" && cmd.changes) {
-      setWorld(prev => ({ ...(prev || {}), ...cmd.changes }));
+      setWorld((prev) => ({ ...(prev || {}), ...cmd.changes }));
     }
 
     if (cmd.action === "remove_object" && cmd.object?.type) {
@@ -51,8 +50,7 @@ export default function WorldBuilder() {
 
   return (
     <div className="h-screen w-screen">
-     <SceneManager objects={objects} world={world} />
-
+      <SceneManager objects={objects} world={world} />
 
       {/* Command Input UI */}
       <form
@@ -66,11 +64,7 @@ export default function WorldBuilder() {
           value={command}
           onChange={(e) => setCommand(e.target.value)}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-dream-indigo"
-        >
+        <button type="submit" disabled={loading} className="btn-dream-indigo">
           {loading ? "Thinking..." : "Run"}
         </button>
       </form>

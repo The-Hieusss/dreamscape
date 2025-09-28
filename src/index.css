@@ -4,7 +4,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@400;600&family=Inter:wght@400;500&display=swap");
 
 /* Tailwind Base */
-@import 'tailwindcss';
+@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -27,27 +27,32 @@
    ============================= */
 @theme {
   /* Colors */
-  --color-dream-bg: #0F172A;
-  --color-dream-indigo: #6366F1;
-  --color-dream-pink: #EC4899;
-  --color-dream-cyan: #06B6D4;
-  --color-dream-text: #F1F5F9;
+  --color-dream-bg: #0f172a;
+  --color-dream-indigo: #6366f1;
+  --color-dream-pink: #ec4899;
+  --color-dream-cyan: #06b6d4;
+  --color-dream-text: #f1f5f9;
 
   /* Typography */
-  --font-display: 'Orbitron', sans-serif;
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: "Orbitron", sans-serif;
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Inter", sans-serif;
 
   /* Text sizes */
-  --text-display: 4rem;   /* ~64px */
-  --text-title: 2rem;     /* ~32px */
-  --text-body: 1rem;      /* ~16px */
+  --text-display: 4rem;
+  /* ~64px */
+  --text-title: 2rem;
+  /* ~32px */
+  --text-body: 1rem;
+  /* ~16px */
 }
 
 /* =============================
    Global Styling
    ============================= */
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
   background: var(--color-dream-bg);
@@ -63,12 +68,11 @@ html, body, #root {
 
 /* Gradient Background */
 .bg-dreamscape {
-  background: linear-gradient(
-    to bottom right,
-    #0F172A,
-    #1E1B4B,
-    #312E81
-  );
+  background: linear-gradient(to bottom right, #0f172a, #1e1b4b, #312e81);
+}
+
+.bg-landingpage {
+  background: diamond-gradient(to bottom right, #06b6d4 0%, #06b6d4 20%);
 }
 
 /* Buttons */
@@ -92,13 +96,26 @@ html, body, #root {
 
 /* Animation: shimmer */
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
+
 /* Fade-in animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeIn {
@@ -117,12 +134,18 @@ html, body, #root {
 }
 
 .shimmer::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; left: -100%;
+  top: 0;
+  left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
   animation: shimmer 2s infinite;
 }
 
@@ -237,6 +260,7 @@ html, body, #root {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
