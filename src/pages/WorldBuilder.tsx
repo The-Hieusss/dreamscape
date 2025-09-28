@@ -1,5 +1,4 @@
 import { useState } from "react";
-import  supabase  from "../lib/supabase";
 import SceneManager from "../components/SceneManager";
 import type { SceneObject, World } from "../lib/types";
 import { generateCommand } from "../lib/ai";
