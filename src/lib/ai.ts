@@ -64,16 +64,22 @@ export async function generateCommand(input: string) {
 
   // === Remove Objects ===
   if (text.startsWith("remove")) {
-    if (text.includes("tree")) return { action: "remove_object", object: { type: "tree" } };
-    if (text.includes("car")) return { action: "remove_object", object: { type: "car" } };
-    if (text.includes("star")) return { action: "remove_object", object: { type: "star" } };
+    if (text.includes("tree"))
+      return { action: "remove_object", object: { type: "tree" } };
+    if (text.includes("car"))
+      return { action: "remove_object", object: { type: "car" } };
+    if (text.includes("star"))
+      return { action: "remove_object", object: { type: "star" } };
   }
 
   // === Modify World (Sky) ===
   if (text.includes("sky")) {
-    if (text.includes("pink")) return { action: "modify_world", changes: { sky_color: "pink" } };
-    if (text.includes("blue")) return { action: "modify_world", changes: { sky_color: "blue" } };
-    if (text.includes("purple")) return { action: "modify_world", changes: { sky_color: "purple" } };
+    if (text.includes("pink"))
+      return { action: "modify_world", changes: { sky_color: "pink" } };
+    if (text.includes("blue"))
+      return { action: "modify_world", changes: { sky_color: "blue" } };
+    if (text.includes("purple"))
+      return { action: "modify_world", changes: { sky_color: "purple" } };
   }
 
   // === Fallback ===
