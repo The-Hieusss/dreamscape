@@ -52,7 +52,7 @@ export default function Home() {
         {/* CTA */}
         <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center">
           <button
-            onClick={() => (window.location.href = "/get-started")}
+            onClick={() => (window.location.href = "/world-builder")}
             className="px-8 py-3 rounded-full bg-dream-indigo font-semibold hover:scale-105 transition-transform"
           >
             Create
