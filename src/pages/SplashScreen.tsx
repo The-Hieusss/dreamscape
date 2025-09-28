@@ -8,10 +8,10 @@ export default function SplashScreen() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-dreamscape animate-fadeIn">
       <div className="flex flex-col items-center text-center">
-        <h1 className="font-display text-dream-indigo text-[3.5rem] sm:text-[5rem] md:text-[7rem] leading-none drop-shadow-lg relative overflow-hidden">
+        <h1 className="font-display text-from-blue-200 via-purple-200 to-pink-200 text-[3.5rem] sm:text-[5rem] md:text-[7rem] leading-none drop-shadow-lg relative overflow-hidden">
           <SplitText
             text="DreamScape."
-            className="text-dream-indigo"
+            className="text-from-blue-200 via-purple-200 to-pink-200"
             delay={100}
             duration={0.6}
             ease="power3.out"
