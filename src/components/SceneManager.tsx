@@ -14,10 +14,14 @@ export default function SceneManager({
 }) {
   const skyColor = (() => {
     switch (world?.sky_color) {
-      case "pink": return "#ff5fa8";
-      case "purple": return "#6b46ff";
-      case "blue": return "#1e3a8a";
-      default: return "#0F172A";
+      case "pink":
+        return "#ff5fa8";
+      case "purple":
+        return "#6b46ff";
+      case "blue":
+        return "#1e3a8a";
+      default:
+        return "#0F172A";
     }
   })();
 

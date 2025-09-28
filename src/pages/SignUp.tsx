@@ -1,5 +1,5 @@
 import { useState } from "react";
-import  supabase  from "../lib/supabase";
+import supabase from "../lib/supabase";
 
 import { Facebook, Instagram,Linkedin } from "lucide-react";
 
@@ -15,7 +15,7 @@ export default function SignUp() {
     setLoading(true);
     setError(null);
 
-    const {  error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });

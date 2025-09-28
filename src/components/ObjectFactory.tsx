@@ -77,14 +77,17 @@ export function ObjectFactory({ obj }: { obj: SceneObject }) {
             <meshStandardMaterial color={obj.color || "red"} />
           </mesh>
           {/* Wheels */}
-          {[[-0.8, -0.3, 0.5], [0.8, -0.3, 0.5], [-0.8, -0.3, -0.5], [0.8, -0.3, -0.5]].map(
-            (wheelPos, i) => (
-              <mesh key={i} position={wheelPos as [number, number, number]}>
-                <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-                <meshStandardMaterial color="black" />
-              </mesh>
-            )
-          )}
+          {[
+            [-0.8, -0.3, 0.5],
+            [0.8, -0.3, 0.5],
+            [-0.8, -0.3, -0.5],
+            [0.8, -0.3, -0.5],
+          ].map((wheelPos, i) => (
+            <mesh key={i} position={wheelPos as [number, number, number]}>
+              <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
+              <meshStandardMaterial color="black" />
+            </mesh>
+          ))}
         </group>
       );
 
