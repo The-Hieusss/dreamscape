@@ -265,3 +265,21 @@ body,
     @apply bg-background text-foreground;
   }
 }
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fade-in-up 0.7s 0.25s both; }
+
+/* Slow ambient pulse */
+@keyframes pulse-slow { 0%,100% { opacity:.55; } 50% { opacity:.85; } }
+.animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
+
+/* Loading bar sweep */
+@keyframes loading-bar {
+  0% { transform: scaleX(0); }
+  55% { transform: scaleX(1); }
+  70% { transform: scaleX(.85); }
+  100% { transform: scaleX(1); }
+}
+.animate-loading-bar { animation: loading-bar 2.4s cubic-bezier(.65,.05,.36,1) forwards; }

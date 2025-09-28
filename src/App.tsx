@@ -3,7 +3,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import SplashScreen from "./pages/SplashScreen";
 import Home from "./pages/Home";
@@ -17,7 +16,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    });
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);

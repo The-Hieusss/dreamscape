@@ -1,4 +1,4 @@
-import LiquidEther from "@/components/LiquidEther";
+import LiquidEther from "@/components/ui/LiquidEther";
 import Navbar from "@/components/ui/NavBar";
 
 export default function Home() {
@@ -18,6 +18,7 @@ export default function Home() {
           takeoverDuration={0.25}
           autoResumeDelay={3000}
           autoRampDuration={0.6}
+          className="bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300"
         />
       </div>
 
