@@ -94,19 +94,22 @@ export default function WorldBuilder() {
       for (let i = 0; i < quantity; i++) {
         let x = 0,
           z = 0;
-        // Bound attempts so dense scenes can never freeze the editor.
-        for (let attempt = 0; attempt < 100; attempt++) {
-          const spread = spec.presetTheme ? 80 : 20;
-          x = (Math.random() - 0.5) * spread;
-          z = (Math.random() - 0.5) * spread;
-          if (
-            working.every(
-              (object) =>
-                !Array.isArray(object.position) ||
-                Math.hypot(object.position[0] - x, object.position[2] - z) >= 2,
+        if (!Array.isArray(spec.position)) {
+          // Bound attempts so dense scenes can never freeze the editor.
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const spread = spec.presetTheme ? 80 : 20;
+            x = (Math.random() - 0.5) * spread;
+            z = (Math.random() - 0.5) * spread;
+            if (
+              working.every(
+                (object) =>
+                  !Array.isArray(object.position) ||
+                  Math.hypot(object.position[0] - x, object.position[2] - z) >=
+                    2,
+              )
             )
-          )
-            break;
+              break;
+          }
         }
         working.push({
           ...spec,

@@ -1,3 +1,4 @@
+import { woodlandObjects } from "./woodlandPreset";
 import { cityObjects } from "./cityPreset";
 import type { World } from "./types";
 
@@ -11,6 +12,7 @@ export const themePresets: Record<string, Partial<World>> = {
       { type: "cloud", position: "random", quantity: 50 },
     ],
   },
+  woodland: { sky_color: "#c6dfd4", terrain: "mountainous", objects: woodlandObjects },
   forest: {
     sky_color: "#88ccff",
     terrain: "mountainous",

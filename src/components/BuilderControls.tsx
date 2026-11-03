@@ -9,6 +9,12 @@ import {
 
 const presets: { theme: WorldTheme; label: string; detail: string }[] = [
   {
+    theme: "woodland",
+    label: "Woodland trail",
+    detail:
+      "A sunlit MegaKit forest with a winding path, ferns and wildflowers",
+  },
+  {
     theme: "forest",
     label: "Forest",
     detail: "Trees, flowers and rolling hills",

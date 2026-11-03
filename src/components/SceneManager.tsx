@@ -1,3 +1,6 @@
+import WoodlandGroundcover, {
+  isWoodlandGroundcover,
+} from "./WoodlandGroundcover";
 import type { Rotation, RotationTool } from "../lib/objectRotation";
 import { groundMovement } from "../lib/objectMovement";
 import type { MoveDirection } from "../lib/objectMovement";
@@ -9,6 +12,7 @@ type MovementRef = RefObject<
 import { Canvas, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
+  PerspectiveCamera,
   OrthographicCamera,
   ContactShadows,
 } from "@react-three/drei";
@@ -53,6 +57,13 @@ function SceneContent({
       movementRef.current = null;
     };
   }, [camera, movementRef, onMove]);
+
+  useEffect(() => {
+    if (world?.theme !== "woodland") return;
+    camera.position.set(3.4, 3.3, 17);
+    camera.lookAt(-2.5, 2, -12);
+    camera.updateProjectionMatrix();
+  }, [world, camera]);
 
   const handleDrop = useCallback(
     (event: DragEvent) => {
@@ -109,6 +120,15 @@ function SceneContent({
 
   return (
     <>
+      {world?.theme === "woodland" && (
+        <PerspectiveCamera
+          makeDefault
+          position={[3.4, 3.3, 17]}
+          fov={62}
+          near={0.1}
+          far={200}
+        />
+      )}
       {world?.theme === "city" && (
         <>
           <OrthographicCamera
@@ -140,23 +160,45 @@ function SceneContent({
         </>
       )}
       <Suspense fallback={null}>
-        {objects.map((o) => (
-          <SelectableObject
-            key={o.editorId}
-            object={o}
-            theme={world?.theme}
-            selected={o.editorId === selectedId}
-            onSelect={() => onSelect(o.editorId ?? null)}
-            rotationTool={rotationTool}
-            onRotate={(rotation) =>
-              o.editorId && onRotate(o.editorId, rotation)
-            }
+        {world?.theme === "woodland" && (
+          <WoodlandGroundcover
+            objects={objects.filter(
+              (object) =>
+                isWoodlandGroundcover(object) && object.editorId !== selectedId,
+            )}
+            onSelect={onSelect}
           />
-        ))}
+        )}
+        {objects
+          .filter(
+            (object) =>
+              world?.theme !== "woodland" ||
+              !isWoodlandGroundcover(object) ||
+              object.editorId === selectedId,
+          )
+          .map((o) => (
+            <SelectableObject
+              key={o.editorId}
+              object={o}
+              theme={world?.theme}
+              selected={o.editorId === selectedId}
+              onSelect={() => onSelect(o.editorId ?? null)}
+              rotationTool={rotationTool}
+              onRotate={(rotation) =>
+                o.editorId && onRotate(o.editorId, rotation)
+              }
+            />
+          ))}
       </Suspense>
       <OrbitControls
         makeDefault
-        target={world?.theme === "city" ? [0, 5, 2] : [0, 0, 0]}
+        target={
+          world?.theme === "city"
+            ? [0, 5, 2]
+            : world?.theme === "woodland"
+              ? [-2.5, 2, -12]
+              : [0, 0, 0]
+        }
         enableDamping
         dampingFactor={0.12}
         maxPolarAngle={Math.PI / 2 - 0.05}

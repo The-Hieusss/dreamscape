@@ -25,7 +25,13 @@ async function visit(directory) {
       const parts = url.split("/");
       entries.push({
         path: url,
-        category: parts.includes("City Kit-glb") ? "City" : parts.at(-2),
+        category: parts.includes("Nature")
+          ? parts.includes("Stylized Nature MegaKit")
+            ? "Nature · MegaKit"
+            : "Nature · Ultimate"
+          : parts.includes("City Kit-glb")
+            ? "City"
+            : parts.at(-2),
         name: entry.name
           .replace(/\.(glb|gltf)$/i, "")
           .replace(/-[A-Za-z0-9]{10}$/, ""),

@@ -8,7 +8,7 @@ export type ObjectType =
   | "mountain"
   | "skyscraper";
 
-export type WorldTheme = "universe" | "forest" | "city" | "ocean" | "desert";
+export type WorldTheme = "universe" | "forest" | "city" | "ocean" | "desert" | "woodland";
 
 
 export interface SceneObject {

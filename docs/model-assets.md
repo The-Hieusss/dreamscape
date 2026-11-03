@@ -34,3 +34,37 @@ npm run assets:catalog
 Verify with `node --experimental-strip-types --test tests/*.test.mjs` and
 `npm run build`. The output should have model files in `dist/models` and no GLBs
 in `dist/assets`.
+
+## Imported nature packs
+
+The downloaded GLBs are organized under:
+
+- `public/models/Nature/Stylized Nature MegaKit/` — 68 assets, library category
+  **Nature · MegaKit**.
+- `public/models/Nature/Ultimate Stylized Nature Pack/` — 12 assets, library category
+  **Nature · Ultimate**. These files contain grouped families (for example, a row
+  of birch trees), rather than one separate file per tree variant.
+
+Unmodified source copies are kept outside the repository in
+`~/Desktop/3D Assets/Nature Source/`, in matching pack folders. Original download
+filenames are preserved; the catalog removes opaque filename suffixes and numbers
+variants for display. The two imports add about 114 MB of GLBs. Texture compression
+and mesh simplification have not been applied to these originals.
+
+Nature thumbnails support transparent leaf and flower textures. Existing images
+remain cached by model content hash; delete an image to rerender it with updated
+thumbnail-rendering settings.
+
+## Woodland trail preset
+
+Choose **Woodland trail** in the terrain preset controls. It uses only MegaKit
+models, a fixed seeded layout, a winding dirt path, and a low starting camera.
+The terrain mesh and placement use the same height function so moved objects
+continue to follow the ground. This preset keeps user-added objects when applied.
+
+Repeated grass and clover are batched with instancing. Clicking a plant or
+selecting it in the object selector temporarily renders that plant individually
+for its existing move, rotation, scale, and remove controls. On deselection it
+returns to the shared batch with its edited properties. Leaf materials use a
+shared alpha cutout for correct foliage silhouettes and shadows; other presets'
+original materials are preserved.

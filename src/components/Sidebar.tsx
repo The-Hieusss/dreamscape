@@ -5,7 +5,7 @@ import { models } from "../lib/ModelRegistry";
 import ModelPreview from "./ModelPreview";
 import {
   ArrowBigRightDash,
-  ArrowBigLeftDash,
+  X,
   Search,
   Star,
   StarOff,
@@ -147,41 +147,12 @@ export default function Sidebar({ theme, onThemeChange, onAddObject, addedCount 
         />
       )}
 
-      <button
-        onClick={() => setCollapsed((c) => !c)}
-        aria-label={collapsed ? "Open library" : "Close library"}
-        className={`
-          group fixed z-50
-          ${
-            isMobile
-              ? "bottom-24 left-4 w-14 h-14"
-              : "bottom-24 left-4 w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16"
-          }
-          rounded-full md:rounded-3xl
-          flex items-center justify-center
-          text-white
-          transition-all duration-500
-          focus:outline-none
-          border border-white/15
-          backdrop-blur-sm
-          active:scale-95
-        `}
-      >
-        {collapsed ? (
-          <ArrowBigRightDash className="relative z-10 w-6 h-6 md:w-7 md:h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] text-green-500" />
-        ) : (
-          <ArrowBigLeftDash className="relative z-10 w-6 h-6 md:w-7 md:h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] text-red-500" />
-        )}
-        <span className="sr-only">Toggle sidebar</span>
-        {/* Pulsing status dot (only when open) */}
-        <span
-          className={`
-            absolute top-2 right-2 w-2 h-2 rounded-full
-            ${collapsed ? "bg-emerald-400/70 animate-pulse" : "bg-pink-400/80"}
-            shadow-[0_0_0_4px_rgba(255,255,255,0.15)]
-          `}
-        />
-      </button>
+      {collapsed && (
+        <button type="button" onClick={() => setCollapsed(false)} aria-label="Open library"
+          className="fixed bottom-24 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-slate-950/80 text-white shadow-lg backdrop-blur hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-indigo-300">
+          <ArrowBigRightDash size={26} />
+        </button>
+      )}
 
       {/* Shell */}
       <aside
@@ -205,7 +176,14 @@ export default function Sidebar({ theme, onThemeChange, onAddObject, addedCount 
         {open && (
           <>
             {/* Top Bar */}
-            <div className="px-4 pt-4 pb-3 border-b border-white/10 space-y-3">
+            <div className="shrink-0 px-4 pt-4 pb-3 border-b border-white/10 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-white">Model library</h2>
+                <button type="button" onClick={() => setCollapsed(true)} aria-label="Close library"
+                  className="flex min-h-10 items-center gap-1.5 rounded-lg border border-white/20 bg-slate-950/60 px-3 text-xs text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-indigo-300">
+                  <X size={16} aria-hidden="true" /> Close
+                </button>
+              </div>
               <div className="flex items-center gap-2 justify-center">
                 <div className="flex items-center gap-2 flex-1 bg-white/5 rounded-lg px-2 h-10 border border-white/10 focus-within:ring-2 ring-dream-indigo/60">
                   <Search size={16} className="text-white/50 shrink-0" />
@@ -285,7 +263,7 @@ export default function Sidebar({ theme, onThemeChange, onAddObject, addedCount 
 
             {/* Scroll area */}
             <div
-              className="flex-1 overflow-y-auto px-4 pb-24 space-y-5 custom-scroll"
+              className="min-h-0 flex-1 overflow-y-auto px-4 pb-24 space-y-5 custom-scroll"
               onKeyDown={handleKey}
             >
               <BuilderControls addedCount={addedCount} theme={theme} onThemeChange={onThemeChange} onAddObject={onAddObject} />

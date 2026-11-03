@@ -1,3 +1,4 @@
+import { foliageMaterial } from "../lib/foliageMaterial";
 import { useGLTF } from "@react-three/drei";
 import { useMemo } from "react";
 import type { ThreeElements } from "@react-three/fiber";
@@ -6,6 +7,7 @@ import * as THREE from "three";
 
 type ModelProps = ThreeElements["group"] & {
   path: string;
+  foliage?: boolean;
   scale?: [number, number, number];
   cloneSkinned?: boolean;
   centerOnGround?: boolean;
@@ -13,6 +15,7 @@ type ModelProps = ThreeElements["group"] & {
 
 export function Model({
   path,
+  foliage = false,
   scale = [1, 1, 1],
   cloneSkinned = true,
   centerOnGround = false,
@@ -27,6 +30,11 @@ export function Model({
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        if (foliage) {
+          child.material = Array.isArray(child.material)
+            ? child.material.map(foliageMaterial)
+            : foliageMaterial(child.material);
+        }
       }
     });
 
@@ -37,7 +45,7 @@ export function Model({
     }
 
     return cloned;
-  }, [scene, cloneSkinned, centerOnGround]);
+  }, [scene, cloneSkinned, centerOnGround, foliage]);
 
   return <primitive object={obj} scale={scale} {...props} />;
 }

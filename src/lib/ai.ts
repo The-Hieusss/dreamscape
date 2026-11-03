@@ -28,6 +28,7 @@ ${availableModels.join("\n")}
 Themes:
 - "universe": stars, sun, moon, dark sky
 - "forest": trees, rocks, mountains
+- "woodland": sunlit forest trail, MegaKit trees, ferns, wildflowers
 - "city": skyscrapers, cars, flat terrain
 - "ocean": water, fish, sharks
 - "desert": sand, cacti, rocks
@@ -48,7 +49,7 @@ Schema:
   "changes"?: {
     "sky_color"?: string,
     "terrain"?: "mountainous" | "flat plains" | "heightmap",
-    "theme"?: "universe" | "forest" | "city" | "ocean" | "desert"
+    "theme"?: "universe" | "forest" | "city" | "ocean" | "desert" | "woodland"
   }
 }
 

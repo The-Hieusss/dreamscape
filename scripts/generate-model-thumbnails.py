@@ -41,6 +41,32 @@ def node_matrix(node):
     return result
 
 
+def draw_cutout_triangle(image, points, uv, texture, tint):
+    """Rasterize alpha-tested foliage so leaf cards don't become solid squares."""
+    left = max(0, int(np.floor(points[:, 0].min())))
+    top = max(0, int(np.floor(points[:, 1].min())))
+    right = min(image.width, int(np.ceil(points[:, 0].max())) + 1)
+    bottom = min(image.height, int(np.ceil(points[:, 1].max())) + 1)
+    if right <= left or bottom <= top:
+        return
+    a, b, c = points
+    denominator = (b[1]-c[1])*(a[0]-c[0]) + (c[0]-b[0])*(a[1]-c[1])
+    if abs(denominator) < 1e-8:
+        return
+    py, px = np.mgrid[top:bottom, left:right] + 0.5
+    w0 = ((b[1]-c[1])*(px-c[0]) + (c[0]-b[0])*(py-c[1])) / denominator
+    w1 = ((c[1]-a[1])*(px-c[0]) + (a[0]-c[0])*(py-c[1])) / denominator
+    w2 = 1-w0-w1
+    inside = (w0 >= -1e-5) & (w1 >= -1e-5) & (w2 >= -1e-5)
+    coords = (w0[..., None]*uv[0] + w1[..., None]*uv[1] + w2[..., None]*uv[2]) % 1
+    rgba = texture[(coords[..., 1]*(texture.shape[0]-1)).astype(int),
+                   (coords[..., 0]*(texture.shape[1]-1)).astype(int)].copy()
+    rgba[..., :3] = np.clip(rgba[..., :3] ** 2.2 * tint, 0, 1) ** (1/2.2)
+    rgba[..., 3] *= inside
+    patch = Image.fromarray((np.clip(rgba, 0, 1)*255).astype("uint8"))
+    image.alpha_composite(patch, (left, top))
+
+
 def render(path, output):
     doc, binary = load_glb(path)
 
@@ -65,12 +91,13 @@ def render(path, output):
             if "bufferView" in image:
                 view = doc["bufferViews"][image["bufferView"]]
                 start = view.get("byteOffset", 0)
-                images[image_index] = np.asarray(Image.open(BytesIO(binary[start:start + view["byteLength"]])).convert("RGB")) / 255
+                images[image_index] = np.asarray(Image.open(BytesIO(binary[start:start + view["byteLength"]])).convert("RGBA")) / 255
             else:
-                images[image_index] = np.asarray(Image.open(path.parent / image["uri"]).convert("RGB")) / 255
+                images[image_index] = np.asarray(Image.open(path.parent / image["uri"]).convert("RGBA")) / 255
         return images[image_index]
 
     triangles, colors = [], []
+    cutouts, base_colors = [], []
 
     def visit(index, parent):
         node = doc["nodes"][index]
@@ -93,13 +120,18 @@ def render(path, output):
                 color = np.tile(np.array(factor[:3], dtype=float), (len(faces), 1))
                 if "COLOR_0" in attributes:
                     color *= accessor(attributes["COLOR_0"])[faces, :3].mean(axis=1)
+                base_colors.append(color.copy())
                 tex = pbr.get("baseColorTexture")
+                cutout = None
                 if tex and "TEXCOORD_0" in attributes:
                     image = texture(tex["index"])
                     uv = accessor(attributes["TEXCOORD_0"])[faces].mean(axis=1) % 1
                     pixels = image[(uv[:, 1] * (image.shape[0]-1)).astype(int),
                                    (uv[:, 0] * (image.shape[1]-1)).astype(int)]
-                    color *= pixels ** 2.2
+                    color *= pixels[:, :3] ** 2.2
+                    if material.get("alphaMode") in ("BLEND", "MASK") and np.any(image[..., 3] < 0.99):
+                        cutout = (image, accessor(attributes["TEXCOORD_0"])[faces])
+                cutouts.extend([(cutout[0], face_uv) for face_uv in cutout[1]] if cutout else [None]*len(faces))
                 triangles.append(vertices[faces, :3])
                 colors.append(color)
         for child in node.get("children", []):
@@ -109,6 +141,7 @@ def render(path, output):
         visit(index, np.eye(4))
     tris = np.concatenate(triangles)
     color = np.concatenate(colors)
+    base_color = np.concatenate(base_colors)
     center = (tris.min(axis=(0, 1)) + tris.max(axis=(0, 1))) / 2
     tris -= center
     forward = np.array([1.4, 0.95, 1.7]); forward /= np.linalg.norm(forward)
@@ -127,7 +160,11 @@ def render(path, output):
     image = Image.new("RGBA", (pixels, pixels))
     draw = ImageDraw.Draw(image)
     for i in np.argsort(points[:, :, 2].mean(axis=1)):
-        draw.polygon([tuple(point) for point in xy[i]], fill=tuple(rgb[i]) + (255,))
+        if cutouts[i] is not None:
+            texture_image, uv = cutouts[i]
+            draw_cutout_triangle(image, xy[i], uv, texture_image, base_color[i] * shade[i])
+        else:
+            draw.polygon([tuple(point) for point in xy[i]], fill=tuple(rgb[i]) + (255,))
     output.parent.mkdir(parents=True, exist_ok=True)
     image.resize((192, 192), Image.Resampling.LANCZOS).save(output, "WEBP", quality=85, method=6)
 

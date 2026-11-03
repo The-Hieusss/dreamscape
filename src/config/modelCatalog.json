@@ -312,6 +312,486 @@
     "thumbnail": "/model-thumbnails/d7f893526ede117c52cb.webp"
   },
   {
+    "path": "/models/Nature/Stylized Nature MegaKit/Bush with Flowers.glb",
+    "category": "Nature · MegaKit",
+    "name": "Bush with Flowers",
+    "thumbnail": "/model-thumbnails/a7f0e022aa77a70a4681.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Bush.glb",
+    "category": "Nature · MegaKit",
+    "name": "Bush",
+    "thumbnail": "/model-thumbnails/1e73125867d602884365.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Clover-u5SOgBFiut.glb",
+    "category": "Nature · MegaKit",
+    "name": "Clover 1",
+    "thumbnail": "/model-thumbnails/991b946f32648e6e4fdd.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Clover.glb",
+    "category": "Nature · MegaKit",
+    "name": "Clover 2",
+    "thumbnail": "/model-thumbnails/d3790041b2f1fb383fdc.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Dead Tree-CD4edbPSGm.glb",
+    "category": "Nature · MegaKit",
+    "name": "Dead Tree 1",
+    "thumbnail": "/model-thumbnails/c6a2b34de53ea610d4dc.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Dead Tree-Mcd2zYqyww.glb",
+    "category": "Nature · MegaKit",
+    "name": "Dead Tree 2",
+    "thumbnail": "/model-thumbnails/7650b888de1b85a3310a.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Dead Tree-MlmK5488ou.glb",
+    "category": "Nature · MegaKit",
+    "name": "Dead Tree 3",
+    "thumbnail": "/model-thumbnails/ef1ccb1f47ace965df22.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Dead Tree-n8FhMgMldD.glb",
+    "category": "Nature · MegaKit",
+    "name": "Dead Tree 4",
+    "thumbnail": "/model-thumbnails/df3d6af947238439fe8c.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Dead Tree.glb",
+    "category": "Nature · MegaKit",
+    "name": "Dead Tree 5",
+    "thumbnail": "/model-thumbnails/42349cdd0397335c6118.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Fern.glb",
+    "category": "Nature · MegaKit",
+    "name": "Fern",
+    "thumbnail": "/model-thumbnails/800c02671b865fd3f524.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Group-LqTljN6Wg2.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Group 1",
+    "thumbnail": "/model-thumbnails/f15532740ff5d60bcab5.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Group.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Group 2",
+    "thumbnail": "/model-thumbnails/4b944bea371dda0c133d.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Petal-eVE0j49ux9.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Petal 1",
+    "thumbnail": "/model-thumbnails/3ad8b01a8944d8768cca.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Petal-LqvxG9OBOU.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Petal 2",
+    "thumbnail": "/model-thumbnails/772f9b036484b26716ae.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Petal-niuBUEJdvM.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Petal 3",
+    "thumbnail": "/model-thumbnails/47092f1f619d31d3b128.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Petal-tzG4JcqYWs.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Petal 4",
+    "thumbnail": "/model-thumbnails/dd482a90060758c7ebeb.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Petal.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Petal 5",
+    "thumbnail": "/model-thumbnails/d0b686e49cc4b144e2c0.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Single-GvfHo0roi3.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Single 1",
+    "thumbnail": "/model-thumbnails/a825c35caccf8054f91b.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Flower Single.glb",
+    "category": "Nature · MegaKit",
+    "name": "Flower Single 2",
+    "thumbnail": "/model-thumbnails/d7f6d9bb536b99ffa8eb.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Grass Wispy-Msr9zx66VU.glb",
+    "category": "Nature · MegaKit",
+    "name": "Grass Wispy 1",
+    "thumbnail": "/model-thumbnails/5b52b380be4faeaf0d6e.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Grass Wispy.glb",
+    "category": "Nature · MegaKit",
+    "name": "Grass Wispy 2",
+    "thumbnail": "/model-thumbnails/0d9df3e3cd280ed45aa5.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Grass.glb",
+    "category": "Nature · MegaKit",
+    "name": "Grass",
+    "thumbnail": "/model-thumbnails/aaeb71f0d56dcd7b952e.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Mushroom Laetiporus.glb",
+    "category": "Nature · MegaKit",
+    "name": "Mushroom Laetiporus",
+    "thumbnail": "/model-thumbnails/fa2de0946185aa357e7e.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Mushroom.glb",
+    "category": "Nature · MegaKit",
+    "name": "Mushroom",
+    "thumbnail": "/model-thumbnails/1fb94fcb913b9971e441.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Round-icVsN3lmVy.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Round 1",
+    "thumbnail": "/model-thumbnails/6c00a0b1495d0a625d71.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Round-kAMfq1uJUY.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Round 2",
+    "thumbnail": "/model-thumbnails/3f2aa2db3da1fbc0423a.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Round-KYtJ6JNXh2.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Round 3",
+    "thumbnail": "/model-thumbnails/3357ec6032ae864da662.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Round-nMf8LHOsbM.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Round 4",
+    "thumbnail": "/model-thumbnails/0a351fa5a782a2f2030c.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Round.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Round 5",
+    "thumbnail": "/model-thumbnails/ceb6d97cca6aa8477b67.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square-2YtLzwgsWp.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 1",
+    "thumbnail": "/model-thumbnails/a22dcb68e335ab89c874.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square-6juX57sLHe.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 2",
+    "thumbnail": "/model-thumbnails/cd0fc31ec5b6574669f0.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square-l5XiYQj1oD.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 3",
+    "thumbnail": "/model-thumbnails/51e75994b0de43295ef8.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square-Mm4RMgwNO8.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 4",
+    "thumbnail": "/model-thumbnails/72c91712bac8e9692f4f.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square-s71L3q1nXN.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 5",
+    "thumbnail": "/model-thumbnails/326eada56aac4d075b67.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pebble Square.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pebble Square 6",
+    "thumbnail": "/model-thumbnails/4e3fc7e403bbafe46e67.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pine-699sFuLCN2.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pine 1",
+    "thumbnail": "/model-thumbnails/3a5db923999bd47281f1.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pine-79gmlLnweB.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pine 2",
+    "thumbnail": "/model-thumbnails/240e6f60c5b106a892c8.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pine-rfnxJv0Rqa.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pine 3",
+    "thumbnail": "/model-thumbnails/4902bbecd22a9503871f.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pine-Zt62gceKXZ.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pine 4",
+    "thumbnail": "/model-thumbnails/d5d7714406e11c7f6578.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Pine.glb",
+    "category": "Nature · MegaKit",
+    "name": "Pine 5",
+    "thumbnail": "/model-thumbnails/b2cc7f2e672f94a41925.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Plant Big-MbhbP7JrTI.glb",
+    "category": "Nature · MegaKit",
+    "name": "Plant Big 1",
+    "thumbnail": "/model-thumbnails/3c34a8e45ce6ac51c0cb.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Plant Big.glb",
+    "category": "Nature · MegaKit",
+    "name": "Plant Big 2",
+    "thumbnail": "/model-thumbnails/c22842627435a5ccbca1.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Plant-xH5gNlQxAZ.glb",
+    "category": "Nature · MegaKit",
+    "name": "Plant 1",
+    "thumbnail": "/model-thumbnails/83bd9a5d2f552ee5bdbf.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Plant.glb",
+    "category": "Nature · MegaKit",
+    "name": "Plant 2",
+    "thumbnail": "/model-thumbnails/133117ea9c4e6b35ec50.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Medium-JQxF95498B.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Medium 1",
+    "thumbnail": "/model-thumbnails/65b04ecd64ef97ce53d2.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Medium-s1OJ3bBzqc.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Medium 2",
+    "thumbnail": "/model-thumbnails/99881282aa8ee2bc89ac.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Medium.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Medium 3",
+    "thumbnail": "/model-thumbnails/c2ab966f16264b4e77de.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Round Small-GMttpOEFKT.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Round Small 1",
+    "thumbnail": "/model-thumbnails/79b5fcf312de42913548.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Round Small-yHEdadj5I0.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Round Small 2",
+    "thumbnail": "/model-thumbnails/752350ca99755c164642.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Round Small.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Round Small 3",
+    "thumbnail": "/model-thumbnails/d63bc3efc5c6123bbdd3.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Round Thin.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Round Thin",
+    "thumbnail": "/model-thumbnails/aa8e32744ed5b0639d63.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Round Wide.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Round Wide",
+    "thumbnail": "/model-thumbnails/55afd043576f3869df56.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Square Smal-cI9XBpVijV.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Square Smal 1",
+    "thumbnail": "/model-thumbnails/f251db8d43920967d8f3.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Square Smal-w4TKZMjjcw.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Square Smal 2",
+    "thumbnail": "/model-thumbnails/83f242307e4263cebf09.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Square Smal.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Square Smal 3",
+    "thumbnail": "/model-thumbnails/3d509808e5935e499f3d.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Square Thin.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Square Thin",
+    "thumbnail": "/model-thumbnails/8928e60d35e6b4b5e566.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Rock Path Square Wide.glb",
+    "category": "Nature · MegaKit",
+    "name": "Rock Path Square Wide",
+    "thumbnail": "/model-thumbnails/0621256adeac3c74df92.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tall Grass.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tall Grass",
+    "thumbnail": "/model-thumbnails/497f6303b662b2f65eea.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tree-aVOxaHRPWe.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tree 1",
+    "thumbnail": "/model-thumbnails/b591827c6aad32ec9fd9.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tree-QVOop92WmG.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tree 2",
+    "thumbnail": "/model-thumbnails/f38d3e28803609be98fc.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tree-qZtx0AHhcy.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tree 3",
+    "thumbnail": "/model-thumbnails/cac32bae011effbb327c.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tree-t9KbsfYdXz.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tree 4",
+    "thumbnail": "/model-thumbnails/6ddb7b1d81a325cfbe30.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Tree.glb",
+    "category": "Nature · MegaKit",
+    "name": "Tree 5",
+    "thumbnail": "/model-thumbnails/2bbb3d68b88f9d05cddc.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Twisted Tree-7PDBpElkQr.glb",
+    "category": "Nature · MegaKit",
+    "name": "Twisted Tree 1",
+    "thumbnail": "/model-thumbnails/01c7f5b15d1df6485fd9.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Twisted Tree-8oraKn9m0x.glb",
+    "category": "Nature · MegaKit",
+    "name": "Twisted Tree 2",
+    "thumbnail": "/model-thumbnails/b2fb1ec0bdb495b7dca7.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Twisted Tree-9aWlx82xUf.glb",
+    "category": "Nature · MegaKit",
+    "name": "Twisted Tree 3",
+    "thumbnail": "/model-thumbnails/5da62dd85ee834e189bb.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Twisted Tree-GVTsMmuzv7.glb",
+    "category": "Nature · MegaKit",
+    "name": "Twisted Tree 4",
+    "thumbnail": "/model-thumbnails/a01a29f8535255bb50f3.webp"
+  },
+  {
+    "path": "/models/Nature/Stylized Nature MegaKit/Twisted Tree.glb",
+    "category": "Nature · MegaKit",
+    "name": "Twisted Tree 5",
+    "thumbnail": "/model-thumbnails/32276e3b05b7d2789c56.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Birch Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Birch Trees",
+    "thumbnail": "/model-thumbnails/f2e47d42052327adb2c2.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Bushes.glb",
+    "category": "Nature · Ultimate",
+    "name": "Bushes",
+    "thumbnail": "/model-thumbnails/fa263900752fa9e011e3.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Dead Trees-F5I0Q7TwO5.glb",
+    "category": "Nature · Ultimate",
+    "name": "Dead Trees 1",
+    "thumbnail": "/model-thumbnails/769e8280e97965f0cc88.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Dead Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Dead Trees 2",
+    "thumbnail": "/model-thumbnails/97d5e7e60971a23b6839.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Flower Bushes.glb",
+    "category": "Nature · Ultimate",
+    "name": "Flower Bushes",
+    "thumbnail": "/model-thumbnails/71d438bf6693a76c6dc5.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Flowers.glb",
+    "category": "Nature · Ultimate",
+    "name": "Flowers",
+    "thumbnail": "/model-thumbnails/e221f4204af6c1e76d8b.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Grass.glb",
+    "category": "Nature · Ultimate",
+    "name": "Grass",
+    "thumbnail": "/model-thumbnails/f773f5f46c688673482c.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Maple Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Maple Trees",
+    "thumbnail": "/model-thumbnails/969af57eca7c117baaa4.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Palm Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Palm Trees",
+    "thumbnail": "/model-thumbnails/70275b7159f1790e2997.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Pine Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Pine Trees",
+    "thumbnail": "/model-thumbnails/2864d5b2294d0ea2941a.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Rocks.glb",
+    "category": "Nature · Ultimate",
+    "name": "Rocks",
+    "thumbnail": "/model-thumbnails/122f937f06b8e1d05d75.webp"
+  },
+  {
+    "path": "/models/Nature/Ultimate Stylized Nature Pack/Trees.glb",
+    "category": "Nature · Ultimate",
+    "name": "Trees",
+    "thumbnail": "/model-thumbnails/2dc587f401a3a86e0e1e.webp"
+  },
+  {
     "path": "/models/Plants/Cactus.glb",
     "category": "Plants",
     "name": "Cactus",

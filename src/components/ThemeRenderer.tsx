@@ -1,3 +1,4 @@
+import WoodlandTerrain from "./WoodlandTerrain";
 import { OCEAN_FLOOR } from "../lib/ocean";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -284,6 +285,17 @@ export function UniverseTerrain() {
 
 export default function ThemeRenderer({ theme }: { theme: string }) {
   switch (theme) {
+    case "woodland":
+      return <>
+        <fog attach="fog" args={["#d3dfbd", 20, 85]} />
+        <ambientLight intensity={0.9} />
+          <directionalLight position={[12, 18, 16]} intensity={1.5} color="#fff5d8" />
+        <hemisphereLight args={["#d5f2ff", "#8d9c39", 1.5]} />
+        <directionalLight position={[-12, 28, -22]} intensity={3.2} color="#fff0b2" castShadow
+          shadow-mapSize={[2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
+          shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-far={100} shadow-normalBias={0.08} />
+        <WoodlandTerrain />
+      </>;
     case "desert":
       return (
         <>
