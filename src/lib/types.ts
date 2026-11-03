@@ -12,6 +12,8 @@ export type WorldTheme = "universe" | "forest" | "city" | "ocean" | "desert";
 
 
 export interface SceneObject {
+  editorId?: string;
+  presetTheme?: WorldTheme;
   type: string; // flexible now, no need for union
   position?: [number, number, number] | "random";
   color?: string;
@@ -19,7 +21,7 @@ export interface SceneObject {
   size?: "tiny" | "small" | "medium" | "normal" | "large" | "huge" | "giant" | number;
   modelPath?: string; 
   category?: string;  
-  rotation?: [number, number, number]; 
+  rotation?: [number, number, number] | "random"; 
   animation?: string;
   speed?: number;
 }

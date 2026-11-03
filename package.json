@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "assets:catalog": "node scripts/generate-model-catalog.mjs",
+    "assets:thumbnails": "npm run assets:catalog && python scripts/generate-model-thumbnails.py",
+    "predev": "npm run assets:catalog",
+    "prebuild": "npm run assets:catalog"
   },
   "dependencies": {
     "@google/genai": "^1.21.0",

@@ -55,7 +55,7 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: var(--color-dream-bg);
+  background: var(--color-dream-cyan);
   color: var(--color-dream-text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

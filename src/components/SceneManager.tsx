@@ -1,8 +1,20 @@
+import type { Rotation, RotationTool } from "../lib/objectRotation";
+import { groundMovement } from "../lib/objectMovement";
+import type { MoveDirection } from "../lib/objectMovement";
+import type { RefObject } from "react";
+
+type MovementRef = RefObject<
+  ((direction: MoveDirection, distance: number) => void) | null
+>;
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import {
+  OrbitControls,
+  OrthographicCamera,
+  ContactShadows,
+} from "@react-three/drei";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import type { SceneObject, World } from "../lib/types";
-import { ObjectFactory } from "./ObjectFactory";
+import SelectableObject from "./SelectableObject";
 import * as THREE from "three";
 import ThemeRenderer from "./ThemeRenderer";
 
@@ -11,14 +23,36 @@ function SceneContent({
   objects,
   world,
   onAddObject,
+  selectedId,
+  onSelect,
+  movementRef,
+  onMove,
+  rotationTool,
+  onRotate,
 }: {
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  movementRef: MovementRef;
+  onMove: (offset: [number, number, number]) => void;
+  rotationTool: RotationTool;
+  onRotate: (id: string, rotation: Rotation) => void;
 }) {
-  const { gl, camera, scene } = useThree();
+  const { gl, camera, scene, size } = useThree();
   const [raycaster] = useState(() => new THREE.Raycaster());
   const pointer = new THREE.Vector2();
+
+  useEffect(() => {
+    movementRef.current = (direction, distance) => {
+      const view = camera.getWorldDirection(new THREE.Vector3());
+      onMove(groundMovement(direction, distance, view.toArray()));
+    };
+    return () => {
+      movementRef.current = null;
+    };
+  }, [camera, movementRef, onMove]);
 
   const handleDrop = useCallback(
     (event: DragEvent) => {
@@ -26,7 +60,7 @@ function SceneContent({
       const path = event.dataTransfer?.getData("application/object-path");
       const name = event.dataTransfer?.getData("application/object-name");
       const category = event.dataTransfer?.getData(
-        "application/object-category"
+        "application/object-category",
       );
       const rotation: [number, number, number] = [
         0,
@@ -43,7 +77,7 @@ function SceneContent({
       raycaster.setFromCamera(pointer, camera);
       const intersects = raycaster.intersectObjects(scene.children, true);
       const terrainHit = intersects.find(
-        (hit) => hit.object.name === "terrain"
+        (hit) => hit.object.name === "terrain",
       );
       if (terrainHit) {
         const { x, y, z } = terrainHit.point;
@@ -57,7 +91,7 @@ function SceneContent({
         });
       }
     },
-    [gl, camera, scene, onAddObject, pointer, raycaster]
+    [gl, camera, scene, onAddObject, pointer, raycaster],
   );
 
   useEffect(() => {
@@ -75,6 +109,26 @@ function SceneContent({
 
   return (
     <>
+      {world?.theme === "city" && (
+        <>
+          <OrthographicCamera
+            makeDefault
+            position={[45, 35, 45]}
+            zoom={Math.min(size.width / 62, size.height / 44)}
+            near={0.1}
+            far={500}
+          />
+          <ContactShadows
+            position={[0, 0.02, 0]}
+            scale={100}
+            far={25}
+            opacity={0.45}
+            blur={2.5}
+            resolution={512}
+          />
+        </>
+      )}
+      <color attach="background" args={[world?.sky_color ?? "#88ccff"]} />
       <ThemeRenderer
         key={world?.theme ?? "default"}
         theme={world?.theme ?? "default"}
@@ -82,17 +136,31 @@ function SceneContent({
       {world?.theme === "ocean" && (
         <>
           <fog attach="fog" args={["#003366", 10, 100]} />
-          <hemisphereLight
-            args={["#88ccee", "#003366", 0.6]}
-          />
+          <hemisphereLight args={["#88ccee", "#003366", 0.6]} />
         </>
       )}
       <Suspense fallback={null}>
-        {objects.map((o, i) => (
-          <ObjectFactory key={i} obj={o} />
+        {objects.map((o) => (
+          <SelectableObject
+            key={o.editorId}
+            object={o}
+            theme={world?.theme}
+            selected={o.editorId === selectedId}
+            onSelect={() => onSelect(o.editorId ?? null)}
+            rotationTool={rotationTool}
+            onRotate={(rotation) =>
+              o.editorId && onRotate(o.editorId, rotation)
+            }
+          />
         ))}
       </Suspense>
-      <OrbitControls />
+      <OrbitControls
+        makeDefault
+        target={world?.theme === "city" ? [0, 5, 2] : [0, 0, 0]}
+        enableDamping
+        dampingFactor={0.12}
+        maxPolarAngle={Math.PI / 2 - 0.05}
+      />
     </>
   );
 }
@@ -101,9 +169,21 @@ export default function SceneManager(props: {
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  movementRef: MovementRef;
+  onMove: (offset: [number, number, number]) => void;
+  rotationTool: RotationTool;
+  onRotate: (id: string, rotation: Rotation) => void;
 }) {
   return (
-    <Canvas camera={{ position: [10, 15, 20], fov: 60 }}>
+    <Canvas
+      shadows
+      camera={{ position: [10, 15, 20], fov: 60 }}
+      onPointerMissed={() => {
+        if (!props.rotationTool.enabled) props.onSelect(null);
+      }}
+    >
       <SceneContent {...props} />
     </Canvas>
   );

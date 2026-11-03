@@ -1,23 +1,30 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
-import { Suspense } from "react";
+import { useState } from "react";
+import { models } from "../lib/ModelRegistry";
 
-function ModelContent({ path }: { path: string }) {
-  const { scene } = useGLTF(path);
-  return <primitive object={scene} scale={[0.6, 0.6, 0.6]} />;
-}
+const byPath = new Map(models.map((model) => [model.path, model]));
 
 export default function ModelPreview({ path }: { path: string }) {
+  const model = byPath.get(path);
+  const [failedSource, setFailedSource] = useState<string | null>(null);
   return (
-    <div className="h-24 w-24 bg-slate-700 rounded">
-      <Canvas camera={{ position: [2, 2, 2], fov: 35 }}>
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 5, 5]} />
-        <Suspense fallback={null}>
-          <ModelContent path={path} />
-        </Suspense>
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={2} />
-      </Canvas>
+    <div className="flex h-full w-full items-center justify-center overflow-hidden rounded bg-slate-800/40">
+      {model && failedSource !== model.thumbnail ? (
+        <img
+          src={model.thumbnail}
+          alt={model.name}
+          width={192}
+          height={192}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onError={() => setFailedSource(model.thumbnail)}
+          className="h-full w-full object-contain"
+        />
+      ) : (
+        <span className="px-2 text-center text-xs text-white/50">
+          {model?.name ?? "Model"}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
+import { OCEAN_FLOOR } from "../lib/ocean";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-
+import { getTerrainHeight } from "@/lib/terrain";
 
 function ProceduralTerrain({
   color,
@@ -35,12 +36,82 @@ function ProceduralTerrain({
   );
 }
 
-export function DesertTerrain() {
-  const noise = (x: number, z: number) =>
-    Math.sin(x * 0.05) * 2 + Math.cos(z * 0.05) * 2; // rolling dunes
-  return <ProceduralTerrain color="#d2b48c" noiseFn={noise} size={300} segments={80} />;
-}
 
+
+export function DesertTerrain() {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  const { geometry, baseHeights } = useMemo(() => {
+    const size = 420;
+    const segs = 180;
+    const geom = new THREE.PlaneGeometry(size, size, segs, segs);
+    geom.rotateX(-Math.PI / 2);
+
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    const base: number[] = [];
+    const cols: number[] = [];
+
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      const h = getTerrainHeight(x, z);
+      base.push(h);
+
+      pos.setY(i, h);
+
+     
+      const norm = (h + 5) / 12; // rough normalize
+      const clamp = Math.min(1, Math.max(0, norm));
+
+      // Base gradient
+      const c1 = new THREE.Color("#b88a42"); // low
+      const c2 = new THREE.Color("#dcb879"); // mid
+      const c3 = new THREE.Color("#f7e5bd"); // crest
+      const mixed = c1.clone().lerp(c2, clamp).lerp(c3, clamp * clamp);
+
+
+
+      cols.push(mixed.r, mixed.g, mixed.b);
+    }
+
+    geom.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
+    geom.computeVertexNormals();
+
+    return { geometry: geom, baseHeights: base, colors: cols };
+  }, []);
+
+  // Subtle heat shimmer / dune drift
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const t = clock.getElapsedTime();
+    const pos = (meshRef.current.geometry as THREE.BufferGeometry)
+      .attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < pos.count; i++) {
+      const y0 = baseHeights[i];
+      // tiny animated ripple (wind)
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      const ripple =
+        Math.sin((x + t * 4) * 0.03) * 0.08 +
+        Math.cos((z - t * 3) * 0.03) * 0.06;
+      pos.setY(i, y0 + ripple);
+    }
+    pos.needsUpdate = true;
+    meshRef.current.geometry.computeVertexNormals();
+  });
+
+  return (
+    <mesh name="terrain" ref={meshRef} geometry={geometry} receiveShadow castShadow>
+      <meshStandardMaterial
+        vertexColors
+        roughness={0.95}
+        metalness={0.05}
+        emissive="#2b1403"
+        emissiveIntensity={0.08}
+      />
+    </mesh>
+  );
+}
 export function OceanTerrain() {
   const waterRef = useRef<THREE.Mesh>(null);
 
@@ -80,7 +151,7 @@ export function OceanTerrain() {
       </mesh>
 
       {/* Sea floor */}
-      <mesh position={[0, -20, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh name="terrain" position={[0, OCEAN_FLOOR, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[400, 400, 50, 50]} />
         <meshStandardMaterial color="#e6d5b8" />
       </mesh>
@@ -90,7 +161,12 @@ export function OceanTerrain() {
 
 
 export function CityTerrain() {
-  return <ProceduralTerrain color="#666666" noiseFn={undefined} size={400} segments={1} />;
+  return (
+    <mesh name="terrain" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <planeGeometry args={[400, 400]} />
+      <meshStandardMaterial color="#1e2c36" roughness={1} metalness={0} />
+    </mesh>
+  );
 }
 
 export function UniverseTerrain() {
@@ -227,14 +303,16 @@ export default function ThemeRenderer({ theme }: { theme: string }) {
     case "city":
       return (
         <>
-          <ambientLight intensity={0.6} />
-          <spotLight position={[0, 50, 50]} angle={0.3} intensity={2} color="orange" />
+          <ambientLight intensity={1.2} />
+          <hemisphereLight args={["#e1efff", "#6b7782", 1.2]} />
+          <directionalLight position={[-20, 40, 25]} intensity={2.5} color="#fff4df" />
           <CityTerrain />
         </>
       );
     case "universe":
       return (
         <>
+          {/* Cosmic background */}
           <ambientLight intensity={0.2} />
           <pointLight position={[100, 100, 100]} intensity={2} color="yellow" />
           <UniverseTerrain />
@@ -245,7 +323,7 @@ export default function ThemeRenderer({ theme }: { theme: string }) {
         <>
           <ambientLight intensity={0.6} />
           <directionalLight position={[20, 20, 10]} intensity={1.2} />
-          <ProceduralTerrain color="#1e3a2a" noiseFn={(x, z) =>
+          <ProceduralTerrain color="#568203" noiseFn={(x, z) =>
             (Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 2
           } />
         </>

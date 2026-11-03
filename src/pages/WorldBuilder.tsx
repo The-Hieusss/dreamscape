@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import type { Rotation, RotationTool } from "../lib/objectRotation";
+import type { MoveDirection } from "../lib/objectMovement";
+import SceneObjectControls from "../components/SceneObjectControls";
+import { useState, useEffect, useCallback, useRef } from "react";
 import SceneManager from "../components/SceneManager";
-import type { SceneObject, World } from "../lib/types";
+import type { SceneObject, World, WorldTheme } from "../lib/types";
 import { getTerrainHeight } from "../lib/terrain";
-import { generateCommand } from "../lib/ai";
 import Sidebar from "../components/Sidebar";
 import { themePresets } from "../lib/themes";
 
@@ -21,6 +23,26 @@ function getAltitude(type?: string) {
   return isFloating(type) ? ALTITUDE[type!] : 0;
 }
 
+const SKY_COLOR_MAP: Record<string, string> = {
+  pink: "#ffb6c1",
+  blue: "#87ceeb",
+  purple: "#800080",
+  orange: "#ffa500",
+  red: "#ff4500",
+  yellow: "#ffff00",
+  green: "#00ff00",
+  indigo: "#4b0082",
+  cyan: "#00ffff",
+  magenta: "#ff00ff",
+  white: "#ffffff",
+  black: "#000000",
+  darkblue: "#00008b",
+  lightblue: "#add8e6",
+  darkred: "#8b0000",
+  lightgreen: "#90ee90",
+  darkgreen: "#006400",
+};
+
 function randomRotationFor(type?: string): [number, number, number] {
   // Upright objects: random Y only
   if (!type) return [0, Math.random() * Math.PI * 2, 0];
@@ -30,116 +52,195 @@ function randomRotationFor(type?: string): [number, number, number] {
   return [0, Math.random() * Math.PI * 2, 0];
 }
 
+function normalizeSkyColor(v?: string): string | undefined {
+  if (!v) return;
+  const trimmed = v.trim().toLowerCase();
+  if (SKY_COLOR_MAP[trimmed]) return SKY_COLOR_MAP[trimmed];
+  // If already hex (#abc or #aabbcc) keep it
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(trimmed)) return trimmed;
+  return undefined;
+}
+
 export default function WorldBuilder() {
+  const movementRef = useRef<
+    ((direction: MoveDirection, distance: number) => void) | null
+  >(null);
+  const [rotationTool, setRotationTool] = useState<RotationTool>({
+    enabled: false,
+    snap: false,
+  });
   const [objects, setObjects] = useState<SceneObject[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [removed, setRemoved] = useState<{
+    object: SceneObject;
+    index: number;
+  } | null>(null);
   const [world, setWorld] = useState<World | null>(null);
   const [command, setCommand] = useState("");
   const [loading, setLoading] = useState(false);
-  const lastAppliedTheme = useRef<string | null>(null);
+  const [error, setError] = useState("");
 
-  function getNonOverlappingPosition(
+  function placeObjects(
     existing: SceneObject[],
-    minDistance = 2
-  ): [number, number, number] {
-    let pos: [number, number, number] = [0, 0, 0];
-    let safe = false;
-
-    while (!safe) {
-      const x = Math.floor(Math.random() * 40 - 20);
-      const z = Math.floor(Math.random() * 40 - 20);
-      const y = getTerrainHeight(x, z); // ✅ snap to terrain
-
-      pos = [x, y, z];
-
-      safe = existing.every(
-        (o) =>
-          Array.isArray(o.position) &&
-          typeof o.position[0] === "number" &&
-          typeof o.position[2] === "number" &&
-          Math.hypot(o.position[0] - pos[0], o.position[2] - pos[2]) >=
-            minDistance
+    specs: SceneObject[],
+    theme?: WorldTheme,
+  ) {
+    const working = [...existing];
+    for (const spec of specs) {
+      const quantity = Math.min(
+        50,
+        Math.max(1, Math.floor(spec.quantity ?? 1)),
       );
+      for (let i = 0; i < quantity; i++) {
+        let x = 0,
+          z = 0;
+        // Bound attempts so dense scenes can never freeze the editor.
+        for (let attempt = 0; attempt < 100; attempt++) {
+          const spread = spec.presetTheme ? 80 : 20;
+          x = (Math.random() - 0.5) * spread;
+          z = (Math.random() - 0.5) * spread;
+          if (
+            working.every(
+              (object) =>
+                !Array.isArray(object.position) ||
+                Math.hypot(object.position[0] - x, object.position[2] - z) >= 2,
+            )
+          )
+            break;
+        }
+        working.push({
+          ...spec,
+          editorId: crypto.randomUUID(),
+          quantity: 1,
+          position: Array.isArray(spec.position)
+            ? spec.position
+            : [x, getTerrainHeight(x, z, theme) + getAltitude(spec.type), z],
+          rotation: Array.isArray(spec.rotation)
+            ? spec.rotation
+            : randomRotationFor(spec.type),
+        });
+      }
     }
-
-    return pos;
+    return working;
   }
+
+  function addObject(object: SceneObject) {
+    setObjects((previous) => placeObjects(previous, [object], world?.theme));
+  }
+
+  function updateSelected(
+    changes: Partial<
+      Pick<SceneObject, "animation" | "speed" | "size" | "rotation">
+    >,
+  ) {
+    setObjects((previous) =>
+      previous.map((object) =>
+        object.editorId === selectedId ? { ...object, ...changes } : object,
+      ),
+    );
+  }
+
+  function rotateObject(id: string, rotation: Rotation) {
+    setObjects((previous) =>
+      previous.map((object) =>
+        object.editorId === id ? { ...object, rotation } : object,
+      ),
+    );
+  }
+
+  function moveSelected(offset: [number, number, number]) {
+    setObjects((previous) =>
+      previous.map((object) => {
+        if (object.editorId !== selectedId || !Array.isArray(object.position))
+          return object;
+        const [x, y, z] = object.position;
+        const nextX = x + offset[0],
+          nextZ = z + offset[2];
+        const nextY =
+          y +
+          getTerrainHeight(nextX, nextZ, world?.theme) -
+          getTerrainHeight(x, z, world?.theme);
+        return { ...object, position: [nextX, nextY, nextZ] };
+      }),
+    );
+  }
+
+  const removeSelected = useCallback(() => {
+    const index = objects.findIndex((object) => object.editorId === selectedId);
+    if (index < 0) return;
+    setRemoved({ object: objects[index], index });
+    setObjects((previous) =>
+      previous.filter((object) => object.editorId !== selectedId),
+    );
+    setSelectedId(null);
+  }, [objects, selectedId]);
+
+  function undoRemove() {
+    if (!removed) return;
+    setObjects((previous) => {
+      const restored = [...previous];
+      restored.splice(
+        Math.min(removed.index, restored.length),
+        0,
+        removed.object,
+      );
+      return restored;
+    });
+    setSelectedId(removed.object.editorId ?? null);
+    setRemoved(null);
+  }
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(
+          "input, textarea, select, button, [contenteditable='true']",
+        )
+      )
+        return;
+      if (event.key === "Escape") setSelectedId(null);
+      if ((event.key === "Delete" || event.key === "Backspace") && selectedId) {
+        event.preventDefault();
+        removeSelected();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [removeSelected, selectedId]);
 
   function applyTheme(theme: string) {
     const preset = themePresets[theme];
     if (!preset) return;
-    if (lastAppliedTheme.current === theme) return; // prevent duplicates
-    lastAppliedTheme.current = theme;
-
-    // Merge world fields
-    setWorld((prev) => {
-      // Ensure all required fields are present
-      const base: World = {
-        id: prev?.id ?? "",
-        name: prev?.name ?? "Untitled World",
-        mood: prev?.mood ?? "",
-        theme: theme as World["theme"],
-        sky_color: preset.sky_color ?? prev?.sky_color ?? "",
-        terrain:
-          preset.terrain ?? prev?.terrain ?? ("forest" as World["terrain"]),
-        objects: prev?.objects ?? [],
-        created_at: prev?.created_at ?? "",
-        updated_at: prev?.updated_at ?? "",
-      };
-      return base;
-    });
-
-    // Add preset objects
-    if (preset.objects?.length) {
-      setObjects((prev) => {
-        const working = [...prev];
-        const additions: SceneObject[] = [];
-        if (preset.objects) {
-          for (const spec of preset.objects) {
-            const qty = spec.quantity ?? 1;
-            for (let i = 0; i < qty; i++) {
-              const [x, , z] = getNonOverlappingPosition(working, 2);
-              const baseY = getTerrainHeight(x, z);
-              const y = baseY + getAltitude(spec.type);
-              const newObj: SceneObject = {
-                ...spec,
-                position: [x, y, z],
-                quantity: 1,
-                rotation: randomRotationFor(spec.type),
-              };
-              additions.push(newObj);
-              working.push(newObj);
-            }
-          }
-        }
-        return [...prev, ...additions];
-      });
-    }
+    const nextTheme = theme as WorldTheme;
+    setSelectedId(null);
+    setRemoved(null);
+    setWorld((previous) => ({
+      ...previous,
+      name: previous?.name ?? "Untitled World",
+      theme: nextTheme,
+      sky_color: normalizeSkyColor(preset.sky_color) ?? "#88ccff",
+      terrain: preset.terrain ?? "flat plains",
+      objects: [],
+    }));
+    setObjects((previous) =>
+      placeObjects(
+        previous.filter((object) => !object.presetTheme),
+        (preset.objects ?? []).map((object) => ({
+          ...object,
+          presetTheme: nextTheme,
+        })),
+        nextTheme,
+      ),
+    );
   }
 
   function applyAICommand(cmd: any) {
     if (!cmd) return;
 
     if (cmd.action === "add_object" && cmd.object) {
-      const qty = cmd.object.quantity ?? 1;
-      let working = [...objects];
-      const newObjects: SceneObject[] = [];
-
-      for (let i = 0; i < qty; i++) {
-        // Pick an X/Z, ensure spacing
-        const pos2D = getNonOverlappingPosition(working, 2);
-        const [x, , z] = pos2D;
-        const terrainY = getTerrainHeight(x, z);
-        const y = terrainY + getAltitude(cmd.object.type);
-
-        const newObj: SceneObject = {
-          ...cmd.object,
-          position: [x, y, z],
-          rotation: randomRotationFor(cmd.object.type),
-        };
-        newObjects.push(newObj);
-        working.push(newObj);
-      }
-      setObjects((prev) => [...prev, ...newObjects]);
+      addObject(cmd.object);
     }
 
     if (
@@ -149,7 +250,12 @@ export default function WorldBuilder() {
       if (cmd.changes.theme) {
         applyTheme(cmd.changes.theme);
       } else {
-        setWorld((prev) => ({ ...(prev || {}), ...cmd.changes }));
+        const normalized = normalizeSkyColor(cmd.changes.sky_color);
+        setWorld((prev) => ({
+          ...(prev || {}),
+          ...cmd.changes,
+          ...(normalized ? { sky_color: normalized } : {}),
+        }));
       }
     }
 
@@ -164,12 +270,25 @@ export default function WorldBuilder() {
     if (!command.trim()) return;
     setLoading(true);
 
-    const aiCmd = await generateCommand(command);
-    console.log("AI Command:", aiCmd);
-
-    applyAICommand(aiCmd);
-    setCommand("");
-    setLoading(false);
+    setError("");
+    try {
+      const { generateCommand } = await import("../lib/ai");
+      const aiCmd = await generateCommand(command);
+      if (!aiCmd)
+        throw new Error(
+          "AI is unavailable. Use the terrain and model controls in the library.",
+        );
+      applyAICommand(aiCmd);
+      setCommand("");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Could not apply that request.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -177,10 +296,45 @@ export default function WorldBuilder() {
       <SceneManager
         objects={objects}
         world={world}
-        onAddObject={(o) => setObjects((prev) => [...prev, o])}
+        onAddObject={addObject}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        rotationTool={rotationTool}
+        onRotate={rotateObject}
+        movementRef={movementRef}
+        onMove={moveSelected}
       />
-      <Sidebar />
 
+      <SceneObjectControls
+        objects={objects}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onUpdate={updateSelected}
+        rotationTool={rotationTool}
+        onRotationToolChange={setRotationTool}
+        onMove={(direction, distance) =>
+          movementRef.current?.(direction, distance)
+        }
+        onRemove={removeSelected}
+        onUndo={undoRemove}
+        canUndo={!!removed}
+      />
+
+      <Sidebar
+        addedCount={objects.filter((object) => !object.presetTheme).length}
+        theme={world?.theme}
+        onThemeChange={applyTheme}
+        onAddObject={addObject}
+      />
+
+      {error && (
+        <p
+          role="alert"
+          className="absolute bottom-24 right-4 max-w-sm rounded-xl bg-slate-900/90 p-3 text-sm text-red-200"
+        >
+          {error}
+        </p>
+      )}
       <form
         onSubmit={handleCommandSubmit}
         className="command-bar absolute inset-x-2 bottom-2 md:bottom-6 md:left-1/2 md:-translate-x-1/2
@@ -192,10 +346,12 @@ export default function WorldBuilder() {
       >
         {/* Input */}
         <div className="flex items-center flex-1 relative">
-          <span className="absolute left-3 text-white/35 hidden md:inline text-sm">⌨️</span>
+          <span className="absolute left-3 text-white/35 hidden md:inline text-sm">
+            ⌨️
+          </span>
           <input
             type="text"
-            placeholder="Describe a change... e.g. “add 5 pine trees near the river”"
+            placeholder="Optional: describe a change with AI…"
             className="flex-1 pl-3 md:pl-10 pr-3 py-2.5 rounded-xl
                        bg-white/10/50 focus:bg-white/10
                        text-white/90 text-sm md:text-base tracking-wide
@@ -246,7 +402,7 @@ export default function WorldBuilder() {
             ) : (
               <span className="flex items-center gap-2">
                 <span className="hidden sm:inline drop-shadow">🚀</span>
-                Run
+                Ask AI
               </span>
             )}
           </span>

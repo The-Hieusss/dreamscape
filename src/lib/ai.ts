@@ -11,7 +11,7 @@ if (!apiKey) {
 }
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
 
 export async function generateCommand(input: string) {
   // Build a list of available models for the LLM
@@ -19,7 +19,7 @@ export async function generateCommand(input: string) {
     (m) => `${m.name} (category: ${m.category}, path: ${m.path})`
   );
 
-  const prompt = `
+    const prompt = `
 You are an assistant that translates natural language into JSON world-building commands.
 
 Available models:
@@ -42,7 +42,7 @@ Schema:
     "position"?: "random" | [x,y,z],
     "color"?: string,
     "size"?: number,
-    "animation"?: string,
+    "animation"?: "Idle" | "Walk" | "Run" | "Eating" | "Attack" | "Death",
     "speed"?: number
   },
   "changes"?: {
@@ -60,10 +60,12 @@ Size rules:
 Default size = 1.0 if not specified.
 
 Animation rules:
-- "graze", "eat" → "Eating"
-- "idle", "stand" → "Idle"
-- "walk", "wander" → "Walk", speed ~0.01–0.02
-- "gallop", "run fast" → "Walk", speed ~0.05
+- "idle", "stand", "stay still" → "Idle"
+- "walk", "wander", "stroll", "move slowly" → "Walk", speed ~0.01–0.02
+- "run", "gallop", "sprint", "chase", "move fast" → "Run", speed ~0.04–0.06
+- "graze", "eat", "feeding" → "Eating"
+- "attack", "bite", "fight", "strike" → "Attack"
+- "die", "death", "fall dead", "collapse" → "Death"
 Default = "Idle"
 
 Examples:
@@ -95,14 +97,13 @@ Examples:
 { "action": "add_object", "object": { "type": "cow", "quantity": 3, "position": "random", "animation": "Walk", "speed": 0.01 } }
 
 "Make horses gallop fast" =>
-{ "action": "add_object", "object": { "type": "horse", "quantity": 2, "position": "random", "animation": "Walk", "speed": 0.05 } }
-
-When spawning multiple animals (like cows, sheep, fish), assign random Y rotation so they don’t all face the same way.
+{ "action": "add_object", "object": { "type": "horse", "quantity": 2, "position": "random", "animation": "Run", "speed": 0.05 } }
 
 IMPORTANT: Always output valid JSON only, no explanations or markdown fences.
 
 User input: "${input}"
 `;
+
 
   if (!apiKey) return null;
 

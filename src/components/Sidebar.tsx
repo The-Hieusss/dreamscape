@@ -1,3 +1,5 @@
+import BuilderControls from "./BuilderControls";
+import type { SceneObject, WorldTheme } from "../lib/types";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { models } from "../lib/ModelRegistry";
 import ModelPreview from "./ModelPreview";
@@ -17,7 +19,12 @@ const FAVORITES_KEY = "dreamscape:favs";
 
 type M = (typeof models)[number];
 
-export default function Sidebar() {
+export default function Sidebar({ theme, onThemeChange, onAddObject, addedCount }: {
+  addedCount: number;
+  theme?: WorldTheme;
+  onThemeChange: (theme: WorldTheme) => void;
+  onAddObject: (object: SceneObject) => void;
+}) {
   /* -------- State (persisted favorites) ---------- */
   const [favorites, setFavorites] = useState<string[]>([]);
   useEffect(() => {
@@ -140,19 +147,40 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Toggle FAB */}
       <button
         onClick={() => setCollapsed((c) => !c)}
-        className={`fixed z-50 rounded-full shadow-lg transition-colors backdrop-blur
-          ${isMobile ? "bottom-4 left-4" : "top-4 left-4"}
-          bg-dream-indigo/80 hover:bg-dream-indigo text-white w-12 h-12 flex items-center justify-center border border-white/10`}
         aria-label={collapsed ? "Open library" : "Close library"}
+        className={`
+          group fixed z-50
+          ${
+            isMobile
+              ? "bottom-24 left-4 w-14 h-14"
+              : "bottom-24 left-4 w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16"
+          }
+          rounded-full md:rounded-3xl
+          flex items-center justify-center
+          text-white
+          transition-all duration-500
+          focus:outline-none
+          border border-white/15
+          backdrop-blur-sm
+          active:scale-95
+        `}
       >
         {collapsed ? (
-          <ArrowBigRightDash size={22} />
+          <ArrowBigRightDash className="relative z-10 w-6 h-6 md:w-7 md:h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] text-green-500" />
         ) : (
-          <ArrowBigLeftDash size={22} />
+          <ArrowBigLeftDash className="relative z-10 w-6 h-6 md:w-7 md:h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] text-red-500" />
         )}
+        <span className="sr-only">Toggle sidebar</span>
+        {/* Pulsing status dot (only when open) */}
+        <span
+          className={`
+            absolute top-2 right-2 w-2 h-2 rounded-full
+            ${collapsed ? "bg-emerald-400/70 animate-pulse" : "bg-pink-400/80"}
+            shadow-[0_0_0_4px_rgba(255,255,255,0.15)]
+          `}
+        />
       </button>
 
       {/* Shell */}
@@ -257,9 +285,10 @@ export default function Sidebar() {
 
             {/* Scroll area */}
             <div
-              className="flex-1 overflow-y-auto px-4 pb-6 space-y-5 custom-scroll"
+              className="flex-1 overflow-y-auto px-4 pb-24 space-y-5 custom-scroll"
               onKeyDown={handleKey}
             >
+              <BuilderControls addedCount={addedCount} theme={theme} onThemeChange={onThemeChange} onAddObject={onAddObject} />
               {showOnlyFavs ? (
                 <ItemGrid
                   items={sortList(favModels.filter(filterMatch))}

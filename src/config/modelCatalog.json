@@ -1,0 +1,392 @@
+[
+  {
+    "path": "/models/Animals/Alpaca.glb",
+    "category": "Animals",
+    "name": "Alpaca",
+    "thumbnail": "/model-thumbnails/de56fcb168469a65275a.webp"
+  },
+  {
+    "path": "/models/Animals/Cow.glb",
+    "category": "Animals",
+    "name": "Cow",
+    "thumbnail": "/model-thumbnails/aa0dfbd619bc14838b48.webp"
+  },
+  {
+    "path": "/models/Animals/Dog.glb",
+    "category": "Animals",
+    "name": "Dog",
+    "thumbnail": "/model-thumbnails/a1e107ec4c2c62ce8cad.webp"
+  },
+  {
+    "path": "/models/Animals/Fish.glb",
+    "category": "Animals",
+    "name": "Fish",
+    "thumbnail": "/model-thumbnails/bfea34878b92eb05d9b2.webp"
+  },
+  {
+    "path": "/models/Animals/Horse.glb",
+    "category": "Animals",
+    "name": "Horse",
+    "thumbnail": "/model-thumbnails/fae7a7ec91e0d6a33554.webp"
+  },
+  {
+    "path": "/models/Animals/Shark.glb",
+    "category": "Animals",
+    "name": "Shark",
+    "thumbnail": "/model-thumbnails/6d5cf3cd7ea749583b62.webp"
+  },
+  {
+    "path": "/models/Animals/Sheep.glb",
+    "category": "Animals",
+    "name": "Sheep",
+    "thumbnail": "/model-thumbnails/91aedec323b54d42b802.webp"
+  },
+  {
+    "path": "/models/Animals/T-Rex.glb",
+    "category": "Animals",
+    "name": "T-Rex",
+    "thumbnail": "/model-thumbnails/e1c9862deef89f096c7d.webp"
+  },
+  {
+    "path": "/models/Animals/Whale.glb",
+    "category": "Animals",
+    "name": "Whale",
+    "thumbnail": "/model-thumbnails/153d6814c67039378fce.webp"
+  },
+  {
+    "path": "/models/Barn.glb",
+    "category": "models",
+    "name": "Barn",
+    "thumbnail": "/model-thumbnails/89b42cf0879470240f0a.webp"
+  },
+  {
+    "path": "/models/Car.glb",
+    "category": "models",
+    "name": "Car",
+    "thumbnail": "/model-thumbnails/be272675f3875c438344.webp"
+  },
+  {
+    "path": "/models/Castle.glb",
+    "category": "models",
+    "name": "Castle",
+    "thumbnail": "/model-thumbnails/461abb4eaf5a41da81b0.webp"
+  },
+  {
+    "path": "/models/Characters/Adventurer.glb",
+    "category": "Characters",
+    "name": "Adventurer",
+    "thumbnail": "/model-thumbnails/4a8639cd8eee9d8a1504.webp"
+  },
+  {
+    "path": "/models/Characters/Farmer.glb",
+    "category": "Characters",
+    "name": "Farmer",
+    "thumbnail": "/model-thumbnails/f7ae6e2596c6521d296f.webp"
+  },
+  {
+    "path": "/models/Characters/Knight.glb",
+    "category": "Characters",
+    "name": "Knight",
+    "thumbnail": "/model-thumbnails/703d20f529f7bc46763c.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-1bt4yYKmuK.glb",
+    "category": "City",
+    "name": "Large Building 1",
+    "thumbnail": "/model-thumbnails/1a567f92d4aa65651dd9.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-3IhrYZp6tP.glb",
+    "category": "City",
+    "name": "Large Building 2",
+    "thumbnail": "/model-thumbnails/4c33eac1c9942ff96138.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-h7Jaq7bqMq.glb",
+    "category": "City",
+    "name": "Large Building 3",
+    "thumbnail": "/model-thumbnails/01191982d8e79b8f4e6b.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-JgGLJH2iXj.glb",
+    "category": "City",
+    "name": "Large Building 4",
+    "thumbnail": "/model-thumbnails/62d9abc50e9bfe1710e6.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-ppwtREejXg.glb",
+    "category": "City",
+    "name": "Large Building 5",
+    "thumbnail": "/model-thumbnails/c37d37d49c96f7978480.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building-sxXonOmtct.glb",
+    "category": "City",
+    "name": "Large Building 6",
+    "thumbnail": "/model-thumbnails/ae5dec9ad99229c23943.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Large Building.glb",
+    "category": "City",
+    "name": "Large Building 7",
+    "thumbnail": "/model-thumbnails/ee7f9f845f3af76afb25.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-4RoPd9BkSx.glb",
+    "category": "City",
+    "name": "Low Building 1",
+    "thumbnail": "/model-thumbnails/d4b44d13cc656070a652.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-9fEKMpTsAi.glb",
+    "category": "City",
+    "name": "Low Building 2",
+    "thumbnail": "/model-thumbnails/a9c2670878e72315a4b4.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-AXFdNPAEc9.glb",
+    "category": "City",
+    "name": "Low Building 3",
+    "thumbnail": "/model-thumbnails/998a083102ecd846f61b.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-dYEbYdPfJr.glb",
+    "category": "City",
+    "name": "Low Building 4",
+    "thumbnail": "/model-thumbnails/163fc505646c0ff57714.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-sObKC8Mio2.glb",
+    "category": "City",
+    "name": "Low Building 5",
+    "thumbnail": "/model-thumbnails/a81a8d143332cbaf4daa.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-tuieC1Pj0a.glb",
+    "category": "City",
+    "name": "Low Building 6",
+    "thumbnail": "/model-thumbnails/8dd587defd5439bcad4d.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-XsFOzw8E5N.glb",
+    "category": "City",
+    "name": "Low Building 7",
+    "thumbnail": "/model-thumbnails/ebba72da7f6438464c15.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building-zfjlejAxB7.glb",
+    "category": "City",
+    "name": "Low Building 8",
+    "thumbnail": "/model-thumbnails/802c5ce850b7dbfe3175.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Building.glb",
+    "category": "City",
+    "name": "Low Building 9",
+    "thumbnail": "/model-thumbnails/5cec85fa77f938391223.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Wide-DKgknsHjmr.glb",
+    "category": "City",
+    "name": "Low Wide 1",
+    "thumbnail": "/model-thumbnails/c332bcbf6275fc3250cc.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Low Wide.glb",
+    "category": "City",
+    "name": "Low Wide 2",
+    "thumbnail": "/model-thumbnails/39525fc836199f158e65.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Sign Hospital.glb",
+    "category": "City",
+    "name": "Sign Hospital 1",
+    "thumbnail": "/model-thumbnails/194e6d0e87d6030ea4d1.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper-BwEXdOoUSO.glb",
+    "category": "City",
+    "name": "Skyscraper 1",
+    "thumbnail": "/model-thumbnails/bc14d7ede562bd87c9d0.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper-jIRx0AhYOR.glb",
+    "category": "City",
+    "name": "Skyscraper 2",
+    "thumbnail": "/model-thumbnails/6137b8892acea9711f30.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper-obYD8hWLTZ.glb",
+    "category": "City",
+    "name": "Skyscraper 3",
+    "thumbnail": "/model-thumbnails/e361d6b6724ac0d17810.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper-PsPe0MzK0E.glb",
+    "category": "City",
+    "name": "Skyscraper 4",
+    "thumbnail": "/model-thumbnails/0bfb0aed157d0a3964f2.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper-XST1j6kYsL.glb",
+    "category": "City",
+    "name": "Skyscraper 5",
+    "thumbnail": "/model-thumbnails/43bbf6529e19c16ecfdf.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Skyscraper.glb",
+    "category": "City",
+    "name": "Skyscraper 6",
+    "thumbnail": "/model-thumbnails/9e4587c640afbb45b3de.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building-gyjF60t7CG.glb",
+    "category": "City",
+    "name": "Small Building 1",
+    "thumbnail": "/model-thumbnails/7aa00a1bee1828e55184.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building-QjL4Fo9dU9.glb",
+    "category": "City",
+    "name": "Small Building 2",
+    "thumbnail": "/model-thumbnails/089b251fd12c2a892fbc.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building-Rq572hdKEz.glb",
+    "category": "City",
+    "name": "Small Building 3",
+    "thumbnail": "/model-thumbnails/3bff3cd9b826e471469a.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building-t9j9Lof5ul.glb",
+    "category": "City",
+    "name": "Small Building 4",
+    "thumbnail": "/model-thumbnails/3948f8dedc972be9c839.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building-yLvnMqC9ZG.glb",
+    "category": "City",
+    "name": "Small Building 5",
+    "thumbnail": "/model-thumbnails/4457070570a87c72fc5e.webp"
+  },
+  {
+    "path": "/models/City/City Kit-glb/Small Building.glb",
+    "category": "City",
+    "name": "Small Building 6",
+    "thumbnail": "/model-thumbnails/8e6396f6b358fcb40274.webp"
+  },
+  {
+    "path": "/models/City/Large Building.glb",
+    "category": "City",
+    "name": "Large Building 8",
+    "thumbnail": "/model-thumbnails/ee7f9f845f3af76afb25.webp"
+  },
+  {
+    "path": "/models/City/Low Building.glb",
+    "category": "City",
+    "name": "Low Building 10",
+    "thumbnail": "/model-thumbnails/5cec85fa77f938391223.webp"
+  },
+  {
+    "path": "/models/City/Low Wide.glb",
+    "category": "City",
+    "name": "Low Wide 3",
+    "thumbnail": "/model-thumbnails/39525fc836199f158e65.webp"
+  },
+  {
+    "path": "/models/City/Sign Hospital.glb",
+    "category": "City",
+    "name": "Sign Hospital 2",
+    "thumbnail": "/model-thumbnails/194e6d0e87d6030ea4d1.webp"
+  },
+  {
+    "path": "/models/City/Small Building.glb",
+    "category": "City",
+    "name": "Small Building 7",
+    "thumbnail": "/model-thumbnails/8e6396f6b358fcb40274.webp"
+  },
+  {
+    "path": "/models/House.glb",
+    "category": "models",
+    "name": "House",
+    "thumbnail": "/model-thumbnails/d7f893526ede117c52cb.webp"
+  },
+  {
+    "path": "/models/Plants/Cactus.glb",
+    "category": "Plants",
+    "name": "Cactus",
+    "thumbnail": "/model-thumbnails/1b985e62f919862f6a4e.webp"
+  },
+  {
+    "path": "/models/Plants/Coral.glb",
+    "category": "Plants",
+    "name": "Coral",
+    "thumbnail": "/model-thumbnails/63219c5123ce4a69b228.webp"
+  },
+  {
+    "path": "/models/Plants/Flower Group.glb",
+    "category": "Plants",
+    "name": "Flower Group",
+    "thumbnail": "/model-thumbnails/4b944bea371dda0c133d.webp"
+  },
+  {
+    "path": "/models/Plants/Grass Patch.glb",
+    "category": "Plants",
+    "name": "Grass Patch",
+    "thumbnail": "/model-thumbnails/f04d0ea02e9e65f67972.webp"
+  },
+  {
+    "path": "/models/Plants/Seaweed.glb",
+    "category": "Plants",
+    "name": "Seaweed",
+    "thumbnail": "/model-thumbnails/3d8e3071c69e6f701a70.webp"
+  },
+  {
+    "path": "/models/Rock Large.glb",
+    "category": "models",
+    "name": "Rock Large",
+    "thumbnail": "/model-thumbnails/c4e9f04c04419e67e919.webp"
+  },
+  {
+    "path": "/models/Space/Earth.glb",
+    "category": "Space",
+    "name": "Earth",
+    "thumbnail": "/model-thumbnails/169d562a07fd2f903364.webp"
+  },
+  {
+    "path": "/models/Space/Moon.glb",
+    "category": "Space",
+    "name": "Moon",
+    "thumbnail": "/model-thumbnails/9c0e46703cb9156bebf3.webp"
+  },
+  {
+    "path": "/models/Space/Planet.glb",
+    "category": "Space",
+    "name": "Planet",
+    "thumbnail": "/model-thumbnails/67c67ac2b2f5af3f6c1f.webp"
+  },
+  {
+    "path": "/models/Space/Spaceship.glb",
+    "category": "Space",
+    "name": "Spaceship",
+    "thumbnail": "/model-thumbnails/64f59395ab292026f1c1.webp"
+  },
+  {
+    "path": "/models/Space/Sun.glb",
+    "category": "Space",
+    "name": "Sun",
+    "thumbnail": "/model-thumbnails/705e5d63f326295e9ab7.webp"
+  },
+  {
+    "path": "/models/Trees/Pine Trees.glb",
+    "category": "Trees",
+    "name": "Pine Trees",
+    "thumbnail": "/model-thumbnails/aea959025a31b0d250d7.webp"
+  },
+  {
+    "path": "/models/Trees/Tree.glb",
+    "category": "Trees",
+    "name": "Tree",
+    "thumbnail": "/model-thumbnails/38374eabf17b0662e081.webp"
+  }
+]

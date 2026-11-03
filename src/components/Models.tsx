@@ -23,10 +23,17 @@ export function Model({
   const obj = useMemo(() => {
     const cloned = cloneSkinned ? cloneSkeleton(scene) : scene.clone(true);
 
+    cloned.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
     if (centerOnGround) {
       const box = new THREE.Box3().setFromObject(cloned);
-      const yOffset = -box.min.y; 
-      cloned.position.y += yOffset; 
+      const yOffset = -box.min.y;
+      cloned.position.y += yOffset;
     }
 
     return cloned;
