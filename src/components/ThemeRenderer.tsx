@@ -1,3 +1,4 @@
+import { CITY_BLOCK_CENTERS, CITY_PAVEMENT_TOP } from "../lib/cityLayout";
 import WoodlandTerrain from "./WoodlandTerrain";
 import { OCEAN_FLOOR } from "../lib/ocean";
 import { useMemo, useRef } from "react";
@@ -37,8 +38,6 @@ function ProceduralTerrain({
   );
 }
 
-
-
 export function DesertTerrain() {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -60,7 +59,6 @@ export function DesertTerrain() {
 
       pos.setY(i, h);
 
-     
       const norm = (h + 5) / 12; // rough normalize
       const clamp = Math.min(1, Math.max(0, norm));
 
@@ -68,9 +66,10 @@ export function DesertTerrain() {
       const c1 = new THREE.Color("#b88a42"); // low
       const c2 = new THREE.Color("#dcb879"); // mid
       const c3 = new THREE.Color("#f7e5bd"); // crest
-      const mixed = c1.clone().lerp(c2, clamp).lerp(c3, clamp * clamp);
-
-
+      const mixed = c1
+        .clone()
+        .lerp(c2, clamp)
+        .lerp(c3, clamp * clamp);
 
       cols.push(mixed.r, mixed.g, mixed.b);
     }
@@ -85,8 +84,8 @@ export function DesertTerrain() {
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const pos = (meshRef.current.geometry as THREE.BufferGeometry)
-      .attributes.position as THREE.BufferAttribute;
+    const pos = (meshRef.current.geometry as THREE.BufferGeometry).attributes
+      .position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       const y0 = baseHeights[i];
       // tiny animated ripple (wind)
@@ -102,7 +101,13 @@ export function DesertTerrain() {
   });
 
   return (
-    <mesh name="terrain" ref={meshRef} geometry={geometry} receiveShadow castShadow>
+    <mesh
+      name="terrain"
+      ref={meshRef}
+      geometry={geometry}
+      receiveShadow
+      castShadow
+    >
       <meshStandardMaterial
         vertexColors
         roughness={0.95}
@@ -152,7 +157,11 @@ export function OceanTerrain() {
       </mesh>
 
       {/* Sea floor */}
-      <mesh name="terrain" position={[0, OCEAN_FLOOR, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh
+        name="terrain"
+        position={[0, OCEAN_FLOOR, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
         <planeGeometry args={[400, 400, 50, 50]} />
         <meshStandardMaterial color="#e6d5b8" />
       </mesh>
@@ -160,13 +169,45 @@ export function OceanTerrain() {
   );
 }
 
-
 export function CityTerrain() {
   return (
-    <mesh name="terrain" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[400, 400]} />
-      <meshStandardMaterial color="#1e2c36" roughness={1} metalness={0} />
-    </mesh>
+    <group>
+      <mesh name="terrain" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[400, 400]} />
+        <meshStandardMaterial color="#869475" roughness={1} />
+      </mesh>
+      {CITY_BLOCK_CENTERS.flatMap((x) =>
+        CITY_BLOCK_CENTERS.map((z) => (
+          <mesh
+            key={`${x}:${z}`}
+            name="terrain"
+            position={[x, CITY_PAVEMENT_TOP / 2, z]}
+            receiveShadow
+          >
+            <boxGeometry args={[16, CITY_PAVEMENT_TOP, 16]} />
+            <meshStandardMaterial color="#c9c5b9" roughness={0.95} />
+          </mesh>
+        )),
+      )}
+      <mesh
+        name="terrain"
+        position={[8.8, CITY_PAVEMENT_TOP + 0.01, 12]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[7, 12]} />
+        <meshStandardMaterial color="#739650" roughness={1} />
+      </mesh>
+      <mesh
+        name="terrain"
+        position={[8.8, CITY_PAVEMENT_TOP + 0.02, 12]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[1.5, 12]} />
+        <meshStandardMaterial color="#ddd3bd" roughness={1} />
+      </mesh>
+    </group>
   );
 }
 
@@ -196,26 +237,19 @@ export function UniverseTerrain() {
   return (
     <>
       {/* Cosmic floor (dark reflective ground) */}
-       <mesh
+      <mesh
         name="terrain"
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -2, 0]}
       >
         <planeGeometry args={[2000, 2000]} />
-        <meshBasicMaterial
-          transparent
-          opacity={0}        
-          depthWrite={false}  
-        />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
       {/* === Starfield === */}
       <points ref={starsRef}>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[stars, 3]}
-          />
+          <bufferAttribute attach="attributes-position" args={[stars, 3]} />
         </bufferGeometry>
         <pointsMaterial
           size={1.5}
@@ -282,25 +316,44 @@ export function UniverseTerrain() {
   );
 }
 
-
 export default function ThemeRenderer({ theme }: { theme: string }) {
   switch (theme) {
     case "woodland":
-      return <>
-        <fog attach="fog" args={["#d3dfbd", 20, 85]} />
-        <ambientLight intensity={0.9} />
-          <directionalLight position={[12, 18, 16]} intensity={1.5} color="#fff5d8" />
-        <hemisphereLight args={["#d5f2ff", "#8d9c39", 1.5]} />
-        <directionalLight position={[-12, 28, -22]} intensity={3.2} color="#fff0b2" castShadow
-          shadow-mapSize={[2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
-          shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-far={100} shadow-normalBias={0.08} />
-        <WoodlandTerrain />
-      </>;
+      return (
+        <>
+          <fog attach="fog" args={["#d3dfbd", 20, 85]} />
+          <ambientLight intensity={0.9} />
+          <directionalLight
+            position={[12, 18, 16]}
+            intensity={1.5}
+            color="#fff5d8"
+          />
+          <hemisphereLight args={["#d5f2ff", "#8d9c39", 1.5]} />
+          <directionalLight
+            position={[-12, 28, -22]}
+            intensity={3.2}
+            color="#fff0b2"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-40}
+            shadow-camera-right={40}
+            shadow-camera-top={40}
+            shadow-camera-bottom={-40}
+            shadow-camera-far={100}
+            shadow-normalBias={0.08}
+          />
+          <WoodlandTerrain />
+        </>
+      );
     case "desert":
       return (
         <>
           <ambientLight intensity={0.7} />
-          <directionalLight position={[100, 100, 0]} intensity={1.0} color="yellow" />
+          <directionalLight
+            position={[100, 100, 0]}
+            intensity={1.0}
+            color="yellow"
+          />
           <DesertTerrain />
         </>
       );
@@ -308,16 +361,31 @@ export default function ThemeRenderer({ theme }: { theme: string }) {
       return (
         <>
           <ambientLight intensity={0.5} />
-          <directionalLight position={[0, 50, 0]} intensity={1.2} color="blue" />
+          <directionalLight
+            position={[0, 50, 0]}
+            intensity={1.2}
+            color="blue"
+          />
           <OceanTerrain />
         </>
       );
     case "city":
       return (
         <>
-          <ambientLight intensity={1.2} />
+          <ambientLight intensity={0.85} />
           <hemisphereLight args={["#e1efff", "#6b7782", 1.2]} />
-          <directionalLight position={[-20, 40, 25]} intensity={2.5} color="#fff4df" />
+          <directionalLight
+            position={[-20, 40, 25]}
+            intensity={2.5}
+            color="#fff4df"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-45}
+            shadow-camera-right={45}
+            shadow-camera-top={45}
+            shadow-camera-bottom={-45}
+            shadow-normalBias={0.03}
+          />
           <CityTerrain />
         </>
       );
@@ -335,9 +403,10 @@ export default function ThemeRenderer({ theme }: { theme: string }) {
         <>
           <ambientLight intensity={0.6} />
           <directionalLight position={[20, 20, 10]} intensity={1.2} />
-          <ProceduralTerrain color="#568203" noiseFn={(x, z) =>
-            (Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 2
-          } />
+          <ProceduralTerrain
+            color="#568203"
+            noiseFn={(x, z) => (Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 2}
+          />
         </>
       );
   }

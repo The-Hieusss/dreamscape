@@ -47,5 +47,9 @@ export function Model({
     return cloned;
   }, [scene, cloneSkinned, centerOnGround, foliage]);
 
-  return <primitive object={obj} scale={scale} {...props} />;
+  return (
+    <group {...props} scale={scale}>
+      <primitive object={obj} />
+    </group>
+  );
 }

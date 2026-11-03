@@ -68,3 +68,26 @@ for its existing move, rotation, scale, and remove controls. On deselection it
 returns to the shared batch with its edited properties. Leaf materials use a
 shared alpha cutout for correct foliage silhouettes and shadows; other presets'
 original materials are preserved.
+
+## Connected city streets
+
+City Builder Bits assets are stored in `public/models/City/City Builder Bits/`.
+The road collections were split into centered, grounded tiles under
+`City/Road Bits/` and `City/Modular Roads/`; only the referenced geometry buffers
+are copied into each derived GLB. Originals are preserved outside the repository
+in `~/Desktop/3D Assets/City Source/`.
+
+To regenerate these road pieces and their library assets:
+
+```sh
+python scripts/prepare-city-assets.py
+npm run assets:thumbnails
+```
+
+**City skyline** now builds four neighborhood blocks around a connected road loop
+and two crossing avenues. It includes crosswalk tiles, raised sidewalk slabs,
+streetlights, traffic signals, parked/posed traffic, benches, hydrants, and a
+small park. Pavement and road heights are shared with object placement, so moving
+objects between streets and sidewalks keeps them grounded. Street fixtures and
+cars are individual editable objects; the cars are static rather than simulated
+traffic.

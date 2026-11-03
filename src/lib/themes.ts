@@ -24,7 +24,7 @@ export const themePresets: Record<string, Partial<World>> = {
     ],
   },
   city: {
-    sky_color: "#1e2c36",
+    sky_color: "#cbdbe2",
     terrain: "flat plains",
     objects: cityObjects,
   },

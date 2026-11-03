@@ -40,9 +40,14 @@ export function ObjectFactory({
       z = Math.random() * 40 - 20;
     }
     if (swimming) return [x, getSwimmingHeight(x, z), z];
-    const baseY = getTerrainHeight(x, z, theme);
+    const baseY =
+      theme === "city" && obj.presetTheme === "city"
+        ? Array.isArray(obj.position)
+          ? obj.position[1]
+          : 0
+        : getTerrainHeight(x, z, theme);
     return [x, baseY + altitude, z];
-  }, [obj.position, obj.type, theme, swimming]);
+  }, [obj.position, obj.type, obj.presetTheme, theme, swimming]);
 
   // Stable random rotation
   const rotRef = useRef<[number, number, number]>(

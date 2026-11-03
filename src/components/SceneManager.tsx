@@ -59,11 +59,22 @@ function SceneContent({
   }, [camera, movementRef, onMove]);
 
   useEffect(() => {
-    if (world?.theme !== "woodland") return;
-    camera.position.set(3.4, 3.3, 17);
-    camera.lookAt(-2.5, 2, -12);
-    camera.updateProjectionMatrix();
-  }, [world, camera]);
+    if (world?.theme === "woodland" && camera.name === "woodland-camera") {
+      camera.position.set(3.4, 3.3, 17);
+      camera.lookAt(-2.5, 2, -12);
+      camera.updateProjectionMatrix();
+    }
+    if (
+      world?.theme === "city" &&
+      camera instanceof THREE.OrthographicCamera &&
+      camera.name === "city-camera"
+    ) {
+      camera.position.set(65, 52, 65);
+      camera.zoom = Math.min(size.width / 95, size.height / 75);
+      camera.lookAt(0, 5, 2);
+      camera.updateProjectionMatrix();
+    }
+  }, [world, camera, size.width, size.height]);
 
   const handleDrop = useCallback(
     (event: DragEvent) => {
@@ -122,6 +133,7 @@ function SceneContent({
     <>
       {world?.theme === "woodland" && (
         <PerspectiveCamera
+          name="woodland-camera"
           makeDefault
           position={[3.4, 3.3, 17]}
           fov={62}
@@ -132,9 +144,10 @@ function SceneContent({
       {world?.theme === "city" && (
         <>
           <OrthographicCamera
+            name="city-camera"
             makeDefault
-            position={[45, 35, 45]}
-            zoom={Math.min(size.width / 62, size.height / 44)}
+            position={[65, 52, 65]}
+            zoom={Math.min(size.width / 95, size.height / 75)}
             near={0.1}
             far={500}
           />

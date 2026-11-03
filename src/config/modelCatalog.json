@@ -90,6 +90,156 @@
     "thumbnail": "/model-thumbnails/703d20f529f7bc46763c.webp"
   },
   {
+    "path": "/models/City/City Builder Bits/Base.glb",
+    "category": "City · Streetscape",
+    "name": "Base",
+    "thumbnail": "/model-thumbnails/37c2d98ec1155820ad4e.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Bench.glb",
+    "category": "City · Streetscape",
+    "name": "Bench",
+    "thumbnail": "/model-thumbnails/43a937c10028a5163d77.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Box B.glb",
+    "category": "City · Streetscape",
+    "name": "Box B",
+    "thumbnail": "/model-thumbnails/72221ec3dde191b18c59.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Box.glb",
+    "category": "City · Streetscape",
+    "name": "Box",
+    "thumbnail": "/model-thumbnails/4b6f7b2d17997f75192c.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building B.glb",
+    "category": "City · Streetscape",
+    "name": "Building B",
+    "thumbnail": "/model-thumbnails/91c9e3b51d8a18dedb17.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-7lMEpT2ICD.glb",
+    "category": "City · Streetscape",
+    "name": "Building 1",
+    "thumbnail": "/model-thumbnails/edbd6ff308caa638277b.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-bbH2Bg73qM.glb",
+    "category": "City · Streetscape",
+    "name": "Building 2",
+    "thumbnail": "/model-thumbnails/35e81d0a0bd8907c7075.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-g15lpKh4li.glb",
+    "category": "City · Streetscape",
+    "name": "Building 3",
+    "thumbnail": "/model-thumbnails/2db87b6afd2aa2fcd719.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-otRsYa6pan.glb",
+    "category": "City · Streetscape",
+    "name": "Building 4",
+    "thumbnail": "/model-thumbnails/5ebaa83522c99c877e28.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-qOhhGLftam.glb",
+    "category": "City · Streetscape",
+    "name": "Building 5",
+    "thumbnail": "/model-thumbnails/a98d4fa6bf1e261da717.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building-T3oyvK6VEU.glb",
+    "category": "City · Streetscape",
+    "name": "Building 6",
+    "thumbnail": "/model-thumbnails/ecda4d8e3a89bb751f61.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Building.glb",
+    "category": "City · Streetscape",
+    "name": "Building 7",
+    "thumbnail": "/model-thumbnails/289278117dd1564c1ae1.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Bush.glb",
+    "category": "City · Streetscape",
+    "name": "Bush",
+    "thumbnail": "/model-thumbnails/1cf096ce1400e2f2ddb4.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Car Hatchback.glb",
+    "category": "City · Streetscape",
+    "name": "Car Hatchback",
+    "thumbnail": "/model-thumbnails/dae7f1e9d4358389fbda.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Dumpster.glb",
+    "category": "City · Streetscape",
+    "name": "Dumpster",
+    "thumbnail": "/model-thumbnails/84ff1b3cb5d986099ce6.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Fire Hydrant.glb",
+    "category": "City · Streetscape",
+    "name": "Fire Hydrant",
+    "thumbnail": "/model-thumbnails/f4f85850a7a9b508383b.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Police Car.glb",
+    "category": "City · Streetscape",
+    "name": "Police Car",
+    "thumbnail": "/model-thumbnails/32a1f0368876df6f950e.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Rocks.glb",
+    "category": "City · Streetscape",
+    "name": "Rocks",
+    "thumbnail": "/model-thumbnails/d535dcf7153e99614073.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Stationwagon.glb",
+    "category": "City · Streetscape",
+    "name": "Stationwagon",
+    "thumbnail": "/model-thumbnails/c2d72ebf36cf3b166c1d.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Streetlight.glb",
+    "category": "City · Streetscape",
+    "name": "Streetlight",
+    "thumbnail": "/model-thumbnails/591bccbcfcedb6650ccb.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Taxi.glb",
+    "category": "City · Streetscape",
+    "name": "Taxi",
+    "thumbnail": "/model-thumbnails/1912b5478f5696b2ff09.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Traffic light-Q6k7Izx6YD.glb",
+    "category": "City · Streetscape",
+    "name": "Traffic light 1",
+    "thumbnail": "/model-thumbnails/406069a596f271aef973.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Traffic light.glb",
+    "category": "City · Streetscape",
+    "name": "Traffic light 2",
+    "thumbnail": "/model-thumbnails/62f4ae0b1d9af777512d.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Trafficlight B.glb",
+    "category": "City · Streetscape",
+    "name": "Trafficlight B",
+    "thumbnail": "/model-thumbnails/fcb10cb46ba9f6ed7240.webp"
+  },
+  {
+    "path": "/models/City/City Builder Bits/Watertower.glb",
+    "category": "City · Streetscape",
+    "name": "Watertower",
+    "thumbnail": "/model-thumbnails/f4ebb616d49203ff1f7d.webp"
+  },
+  {
     "path": "/models/City/City Kit-glb/Large Building-1bt4yYKmuK.glb",
     "category": "City",
     "name": "Large Building 1",
@@ -292,6 +442,300 @@
     "category": "City",
     "name": "Low Wide 3",
     "thumbnail": "/model-thumbnails/39525fc836199f158e65.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/bridge pillar.glb",
+    "category": "City · Roads",
+    "name": "bridge pillar",
+    "thumbnail": "/model-thumbnails/96450799dc272470890b.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/bridge pillarWide.glb",
+    "category": "City · Roads",
+    "name": "bridge pillarWide",
+    "thumbnail": "/model-thumbnails/1407ca49fa66d23c11a1.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light curved.glb",
+    "category": "City · Roads",
+    "name": "light curved",
+    "thumbnail": "/model-thumbnails/7312c19804d37ef7ef94.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light curvedCross.glb",
+    "category": "City · Roads",
+    "name": "light curvedCross",
+    "thumbnail": "/model-thumbnails/5909a77c0557762187a9.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light curvedDouble.glb",
+    "category": "City · Roads",
+    "name": "light curvedDouble",
+    "thumbnail": "/model-thumbnails/6dd50e403e1a7ab564c6.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light square.glb",
+    "category": "City · Roads",
+    "name": "light square",
+    "thumbnail": "/model-thumbnails/7c564b290071d40e2223.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light squareCross.glb",
+    "category": "City · Roads",
+    "name": "light squareCross",
+    "thumbnail": "/model-thumbnails/00de1f3213ad93a468ce.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/light squareDouble.glb",
+    "category": "City · Roads",
+    "name": "light squareDouble",
+    "thumbnail": "/model-thumbnails/ed0bbdb498fffa187eb4.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road bend.glb",
+    "category": "City · Roads",
+    "name": "road bend",
+    "thumbnail": "/model-thumbnails/0095c4f3c4157291b70b.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road bendSidewalk.glb",
+    "category": "City · Roads",
+    "name": "road bendSidewalk",
+    "thumbnail": "/model-thumbnails/603b3bcd6a349c12c5bf.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road bendSquare.glb",
+    "category": "City · Roads",
+    "name": "road bendSquare",
+    "thumbnail": "/model-thumbnails/09145d40bc6137f7f905.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road bridge.glb",
+    "category": "City · Roads",
+    "name": "road bridge",
+    "thumbnail": "/model-thumbnails/651c4b0f365a647bac0f.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road crossing.glb",
+    "category": "City · Roads",
+    "name": "road crossing",
+    "thumbnail": "/model-thumbnails/cf6ad4406ed5b2aa3111.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road crossroad.glb",
+    "category": "City · Roads",
+    "name": "road crossroad",
+    "thumbnail": "/model-thumbnails/e75d2bf0e1a606b93ba3.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road crossroadLine.glb",
+    "category": "City · Roads",
+    "name": "road crossroadLine",
+    "thumbnail": "/model-thumbnails/08f4f521856655e000d8.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road crossroadPath.glb",
+    "category": "City · Roads",
+    "name": "road crossroadPath",
+    "thumbnail": "/model-thumbnails/89a9a3ba10a4bc86ea27.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road curve.glb",
+    "category": "City · Roads",
+    "name": "road curve",
+    "thumbnail": "/model-thumbnails/d8634a21383f6197c9fd.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road curveIntersection.glb",
+    "category": "City · Roads",
+    "name": "road curveIntersection",
+    "thumbnail": "/model-thumbnails/f87c746b374c7c7f5be5.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road curvePavement.glb",
+    "category": "City · Roads",
+    "name": "road curvePavement",
+    "thumbnail": "/model-thumbnails/2694a3be1f89e972ed1f.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road drivewayDoubleBarrier.glb",
+    "category": "City · Roads",
+    "name": "road drivewayDoubleBarrier",
+    "thumbnail": "/model-thumbnails/81673765c7f63ce03b0e.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road drivewaySingleBarrier.glb",
+    "category": "City · Roads",
+    "name": "road drivewaySingleBarrier",
+    "thumbnail": "/model-thumbnails/936615e05a76a5b9fdde.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road end.glb",
+    "category": "City · Roads",
+    "name": "road end",
+    "thumbnail": "/model-thumbnails/7b7bea2e84030df4e12a.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road endRound.glb",
+    "category": "City · Roads",
+    "name": "road endRound",
+    "thumbnail": "/model-thumbnails/821124f3f477a4945c86.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road intersection.glb",
+    "category": "City · Roads",
+    "name": "road intersection",
+    "thumbnail": "/model-thumbnails/d99cf029033b52591a98.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road intersectionLine.glb",
+    "category": "City · Roads",
+    "name": "road intersectionLine",
+    "thumbnail": "/model-thumbnails/458ead7b09eb5bfae680.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road intersectionPath.glb",
+    "category": "City · Roads",
+    "name": "road intersectionPath",
+    "thumbnail": "/model-thumbnails/cb48fd099f9a4a5cdc25.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road roundabout.glb",
+    "category": "City · Roads",
+    "name": "road roundabout",
+    "thumbnail": "/model-thumbnails/80a1197d49190e6346de.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road side.glb",
+    "category": "City · Roads",
+    "name": "road side",
+    "thumbnail": "/model-thumbnails/6059679955107f3dd656.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road sideEntry.glb",
+    "category": "City · Roads",
+    "name": "road sideEntry",
+    "thumbnail": "/model-thumbnails/d4d450a927f66b47915d.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road sideExit.glb",
+    "category": "City · Roads",
+    "name": "road sideExit",
+    "thumbnail": "/model-thumbnails/dea87a989ca999925d79.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slant.glb",
+    "category": "City · Roads",
+    "name": "road slant",
+    "thumbnail": "/model-thumbnails/36b79ad5c9af249fded9.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slantCurve.glb",
+    "category": "City · Roads",
+    "name": "road slantCurve",
+    "thumbnail": "/model-thumbnails/74d487aa5294686e8ef9.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slantFlat.001.glb",
+    "category": "City · Roads",
+    "name": "road slantFlat.001",
+    "thumbnail": "/model-thumbnails/fb591dd4444ec9ba195f.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slantFlat.glb",
+    "category": "City · Roads",
+    "name": "road slantFlat",
+    "thumbnail": "/model-thumbnails/98d1a9b755db4d210ff2.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slantFlatHigh.glb",
+    "category": "City · Roads",
+    "name": "road slantFlatHigh",
+    "thumbnail": "/model-thumbnails/05e60250272e7613c4e8.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road slantHigh.glb",
+    "category": "City · Roads",
+    "name": "road slantHigh",
+    "thumbnail": "/model-thumbnails/884d2e334d2fa0aa194e.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road splitBarrier.glb",
+    "category": "City · Roads",
+    "name": "road splitBarrier",
+    "thumbnail": "/model-thumbnails/4d1cdb0ef078689eb969.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road square.glb",
+    "category": "City · Roads",
+    "name": "road square",
+    "thumbnail": "/model-thumbnails/c69d701a184855fd1dde.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/road straightBarrier.glb",
+    "category": "City · Roads",
+    "name": "road straightBarrier",
+    "thumbnail": "/model-thumbnails/f43007d99d1b3dedba02.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/tile high.glb",
+    "category": "City · Roads",
+    "name": "tile high",
+    "thumbnail": "/model-thumbnails/713774da756182a66767.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/tile low.glb",
+    "category": "City · Roads",
+    "name": "tile low",
+    "thumbnail": "/model-thumbnails/e5ae9979117e1b9a21ac.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/tile slant.glb",
+    "category": "City · Roads",
+    "name": "tile slant",
+    "thumbnail": "/model-thumbnails/1f39fbe0711c154bf655.webp"
+  },
+  {
+    "path": "/models/City/Modular Roads/tile slantHigh.glb",
+    "category": "City · Roads",
+    "name": "tile slantHigh",
+    "thumbnail": "/model-thumbnails/2e6f686d28f4c1bb3a03.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road corner curved.glb",
+    "category": "City · Roads",
+    "name": "road corner curved",
+    "thumbnail": "/model-thumbnails/d7c7f91c00cce77993bd.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road corner.glb",
+    "category": "City · Roads",
+    "name": "road corner",
+    "thumbnail": "/model-thumbnails/af1e45d780255c3ef29e.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road junction.glb",
+    "category": "City · Roads",
+    "name": "road junction",
+    "thumbnail": "/model-thumbnails/51fde5fcde2c4bd43351.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road straight crossing.glb",
+    "category": "City · Roads",
+    "name": "road straight crossing",
+    "thumbnail": "/model-thumbnails/be8f2b9f83ef842d5715.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road straight.glb",
+    "category": "City · Roads",
+    "name": "road straight",
+    "thumbnail": "/model-thumbnails/0651b767ad92c68eb429.webp"
+  },
+  {
+    "path": "/models/City/Road Bits/road tsplit.glb",
+    "category": "City · Roads",
+    "name": "road tsplit",
+    "thumbnail": "/model-thumbnails/dc43f7bf49851bc7638c.webp"
   },
   {
     "path": "/models/City/Sign Hospital.glb",

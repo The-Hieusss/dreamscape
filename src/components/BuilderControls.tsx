@@ -27,7 +27,7 @@ const presets: { theme: WorldTheme; label: string; detail: string }[] = [
   {
     theme: "city",
     label: "City skyline",
-    detail: "A planned city-kit skyline with towers and storefronts",
+    detail: "Connected streets, sidewalks, parks, traffic and city buildings",
   },
   {
     theme: "desert",

@@ -29,9 +29,13 @@ async function visit(directory) {
           ? parts.includes("Stylized Nature MegaKit")
             ? "Nature · MegaKit"
             : "Nature · Ultimate"
-          : parts.includes("City Kit-glb")
-            ? "City"
-            : parts.at(-2),
+          : parts.includes("Road Bits") || parts.includes("Modular Roads")
+            ? "City · Roads"
+            : parts.includes("City Builder Bits")
+              ? "City · Streetscape"
+              : parts.includes("City")
+                ? "City"
+                : parts.at(-2),
         name: entry.name
           .replace(/\.(glb|gltf)$/i, "")
           .replace(/-[A-Za-z0-9]{10}$/, ""),
