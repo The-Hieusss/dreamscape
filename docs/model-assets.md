@@ -103,3 +103,42 @@ models form seeded clusters around the wash. Scenery remains individually editab
 The editor opens with a view down the basin. **Explore on foot** starts in the
 clear wash and uses the same height function as rendering and object placement.
 No additional model downloads are needed for this preset.
+
+## Medieval village
+
+The 39 Medieval Village Pack GLBs live in `public/models/Medieval/Village Pack/`
+and appear under **Medieval village** in the model library. Original downloads
+are backed up outside the repository at
+`/Users/hieuthan/Desktop/3D Assets/Medieval Source/Medieval Village Pack`.
+Run `npm run assets:thumbnails` after adding or replacing models to refresh the
+catalog and hash-addressed previews.
+
+The **Medieval village** terrain preset places timber houses, an inn, a windmill,
+a bell tower, workshops, and a market around a well and connected cobbled lanes.
+Fences, carts, supplies, and existing leafy trees complete the meadow setting.
+All scenery is individually editable. **Explore on foot** starts at the entrance
+lane and uses the cobbled surface height; the surrounding meadow rolls into hills.
+
+The village also starts with five farmers and three knights using the existing
+character GLBs. Walking residents choose random branches on the lane network,
+turn back at lane ends, and use varied speeds. Farmers and knights added manually
+use the same routes when their Walk/Run animation is enabled. Other moving models
+wander with reflected boundary turns. Village movement stays within X −28…70 / Z ±26,
+inside the fences; other worlds use X/Z ±120. Idle animations stay in place.
+
+
+### Farm extension
+
+The 10 Farm Buildings Bundle GLBs are organized in
+`public/models/Medieval/Farm Buildings/`, under **Medieval · Farm** in the library.
+Source originals are backed up at
+`/Users/hieuthan/Desktop/3D Assets/Farm Source/Farm Buildings Bundle`.
+The catalog and 10 new content-addressed thumbnails were generated with
+`npm run assets:thumbnails` (268 models total).
+
+The medieval preset now extends east into a farmstead with barns, grain silos,
+a chicken coop, a tower windmill, fenced yards, hay supplies and four planted
+plots. Instanced wheat and green crops keep the field rendering lightweight;
+soil furrows and crops are part of the terrain, while farm buildings and props
+remain editable. The flat meadow, connected paths, resident route network,
+movement bounds, and opening camera cover the enlarged village and farm.

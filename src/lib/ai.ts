@@ -27,6 +27,7 @@ ${availableModels.join("\n")}
 
 Themes:
 - "universe": stars, sun, moon, dark sky
+- "village": medieval timber houses, a windmill, market and cobbled lanes
 - "forest": trees, rocks, mountains
 - "woodland": sunlit forest trail, MegaKit trees, ferns, wildflowers
 - "city": skyscrapers, cars, flat terrain
@@ -49,7 +50,7 @@ Schema:
   "changes"?: {
     "sky_color"?: string,
     "terrain"?: "mountainous" | "flat plains" | "heightmap",
-    "theme"?: "universe" | "forest" | "city" | "ocean" | "desert" | "woodland"
+    "theme"?: "universe" | "forest" | "city" | "ocean" | "desert" | "woodland" | "village"
   }
 }
 

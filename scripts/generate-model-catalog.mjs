@@ -25,17 +25,21 @@ async function visit(directory) {
       const parts = url.split("/");
       entries.push({
         path: url,
-        category: parts.includes("Nature")
-          ? parts.includes("Stylized Nature MegaKit")
-            ? "Nature · MegaKit"
-            : "Nature · Ultimate"
-          : parts.includes("Road Bits") || parts.includes("Modular Roads")
-            ? "City · Roads"
-            : parts.includes("City Builder Bits")
-              ? "City · Streetscape"
-              : parts.includes("City")
-                ? "City"
-                : parts.at(-2),
+        category: parts.includes("Medieval")
+          ? parts.includes("Farm Buildings")
+            ? "Medieval · Farm"
+            : "Medieval village"
+          : parts.includes("Nature")
+            ? parts.includes("Stylized Nature MegaKit")
+              ? "Nature · MegaKit"
+              : "Nature · Ultimate"
+            : parts.includes("Road Bits") || parts.includes("Modular Roads")
+              ? "City · Roads"
+              : parts.includes("City Builder Bits")
+                ? "City · Streetscape"
+                : parts.includes("City")
+                  ? "City"
+                  : parts.at(-2),
         name: entry.name
           .replace(/\.(glb|gltf)$/i, "")
           .replace(/-[A-Za-z0-9]{10}$/, ""),

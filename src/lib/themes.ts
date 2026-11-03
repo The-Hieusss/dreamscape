@@ -1,9 +1,11 @@
+import { villageObjects } from "./villagePreset";
 import { desertObjects } from "./desertPreset";
 import { woodlandObjects } from "./woodlandPreset";
 import { cityObjects } from "./cityPreset";
 import type { World } from "./types";
 
 export const themePresets: Record<string, Partial<World>> = {
+  village: { sky_color: "#c8dacf", terrain: "flat plains", objects: villageObjects },
   universe: {
     sky_color: "#000011",
     terrain: "flat plains",

@@ -91,6 +91,17 @@ function SceneContent({
       camera.lookAt(0, 5, 2);
       camera.updateProjectionMatrix();
     }
+    if (
+      !roaming &&
+      world?.theme === "village" &&
+      camera instanceof THREE.OrthographicCamera &&
+      camera.name === "village-camera"
+    ) {
+      camera.position.set(98, 65, 80);
+      camera.zoom = Math.min(size.width / 145, size.height / 105);
+      camera.lookAt(18, 4, 0);
+      camera.updateProjectionMatrix();
+    }
   }, [world, camera, size.width, size.height, roaming]);
 
   const handleDrop = useCallback(
@@ -165,6 +176,16 @@ function SceneContent({
           name="desert-camera"
           position={[15, 10, 26]}
           fov={60}
+          near={0.1}
+          far={500}
+        />
+      )}
+      {world?.theme === "village" && !roaming && (
+        <OrthographicCamera
+          makeDefault
+          name="village-camera"
+          position={[98, 65, 80]}
+          zoom={Math.min(size.width / 145, size.height / 105)}
           near={0.1}
           far={500}
         />
@@ -256,11 +277,13 @@ function SceneContent({
           target={
             world?.theme === "city"
               ? [0, 5, 2]
-              : world?.theme === "woodland"
-                ? [-2.5, 2, -12]
-                : world?.theme === "desert"
-                  ? [-3, 3, -26]
-                  : [0, 0, 0]
+              : world?.theme === "village"
+                ? [18, 4, 0]
+                : world?.theme === "woodland"
+                  ? [-2.5, 2, -12]
+                  : world?.theme === "desert"
+                    ? [-3, 3, -26]
+                    : [0, 0, 0]
           }
           enableDamping
           dampingFactor={0.12}

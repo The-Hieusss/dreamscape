@@ -8,6 +8,7 @@ import {
 } from "../lib/modelAnimations";
 
 const presets: { theme: WorldTheme; label: string; detail: string }[] = [
+  {theme:"village",label:"Medieval village",detail:"Timber houses, a village market, working farms and planted fields"},
   {
     theme: "woodland",
     label: "Woodland trail",

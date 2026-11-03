@@ -1,3 +1,4 @@
+import VillageTerrain from "./VillageTerrain";
 import { Sky } from "@react-three/drei";
 import DesertLandscape from "./DesertLandscape";
 import { CITY_BLOCK_CENTERS, CITY_PAVEMENT_TOP } from "../lib/cityLayout";
@@ -239,6 +240,14 @@ export function UniverseTerrain() {
 
 export default function ThemeRenderer({ theme }: { theme: string }) {
   switch (theme) {
+    case "village":
+      return <>
+        <fog attach="fog" args={["#c8dacf",160,320]} />
+        <ambientLight intensity={0.85} />
+        <hemisphereLight args={["#e1f0ff","#829046",1.1]} />
+        <directionalLight position={[-25,40,20]} intensity={2.5} color="#fff0cd" castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-90} shadow-camera-right={90} shadow-camera-top={90} shadow-camera-bottom={-90} shadow-camera-far={200} shadow-normalBias={0.035} />
+        <VillageTerrain />
+      </>;
     case "woodland":
       return (
         <>

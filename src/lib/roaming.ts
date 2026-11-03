@@ -14,6 +14,7 @@ export function roamStart(theme?: string) {
       z: 14,
       yaw: Math.atan2(desertWashCenter(14) - desertWashCenter(-20), 34),
     };
+  if (theme === "village") return { x: 0, z: 26, yaw: 0 };
   if (theme === "city") return { x: -1.9, z: 20, yaw: 0 };
   return { x: 0, z: 10, yaw: 0 };
 }

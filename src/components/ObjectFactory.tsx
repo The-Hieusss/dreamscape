@@ -41,7 +41,7 @@ export function ObjectFactory({
     }
     if (swimming) return [x, getSwimmingHeight(x, z), z];
     const baseY =
-      theme === "city" && obj.presetTheme === "city"
+      (theme === "city" || theme === "village") && obj.presetTheme === theme
         ? Array.isArray(obj.position)
           ? obj.position[1]
           : 0
@@ -89,6 +89,7 @@ export function ObjectFactory({
           obj.speed ??
           (obj.animation?.toLowerCase().includes("walk") ? 0.02 : 0)
         }
+        villageResident={/\/(Farmer|Knight)\.glb$/i.test(path)}
         terrainTheme={theme}
         stickToTerrain={!swimming}
         swimInWater={swimming}

@@ -1,3 +1,4 @@
+import { villageHeight } from "./villageTerrain";
 import { desertHeight } from "./desertTerrain";
 import { cityGroundHeight } from "./cityLayout";
 import { woodlandHeight } from "./woodlandTerrain";
@@ -9,6 +10,7 @@ export function getTerrainHeight(
   z: number,
   theme?: WorldTheme,
 ): number {
+  if (theme === "village") return villageHeight(x,z);
   if (theme === "desert") return desertHeight(x, z);
   if (theme === "woodland") return woodlandHeight(x, z);
   if (theme === "ocean") return OCEAN_FLOOR;

@@ -1,3 +1,9 @@
+import {
+  createVillageWalk,
+  stepVillageWalk,
+  stepWander,
+  worldBounds,
+} from "../lib/wandering";
 import { getSwimmingHeight } from "../lib/ocean";
 import type { WorldTheme } from "../lib/types";
 // filepath: src/components/AnimatedModel.tsx
@@ -31,8 +37,7 @@ type AnimatedModelProps = {
   speed?: number;
   stickToTerrain?: boolean;
   swimInWater?: boolean;
-  wanderBounds?: number;
-  bounceAtEdge?: boolean;
+  villageResident?: boolean;
 };
 
 export default function AnimatedModel({
@@ -44,19 +49,20 @@ export default function AnimatedModel({
   speed = 0.02,
   stickToTerrain = true,
   swimInWater = false,
-  wanderBounds = 150,
-  bounceAtEdge = false,
+  villageResident = false,
   ...props
 }: AnimatedModelProps & JSX.IntrinsicElements["group"]) {
   const group = useRef<THREE.Group>(null);
   const targetQuat = useRef(new THREE.Quaternion());
-  const heading = useRef(Math.random() * Math.PI * 2);
-  const lastRandomTurn = useRef(0);
-
-  // steering params
-  const turningCooldown = 1.2; // seconds between random turns
-  const turnJitter = Math.PI * 0.35;
-  const steerEase = 0.12;
+  const motion = useRef(createVillageWalk(0, 0));
+  useEffect(() => {
+    const position = props.position;
+    const x = Array.isArray(position) ? position[0] : 0;
+    const z = Array.isArray(position) ? position[2] : 0;
+    motion.current = createVillageWalk(x, z);
+    motion.current.heading = Math.random() * Math.PI * 2;
+    motion.current.turnIn = 2 + Math.random() * 4;
+  }, [props.position, terrainTheme]);
 
   const { scene, animations } = useGLTF(path);
   const cloned = useMemo(() => cloneSkeleton(scene), [scene]);
@@ -129,54 +135,23 @@ export default function AnimatedModel({
       speed > 0;
 
     if (moving) {
-      const now = state.clock.getElapsedTime();
-
-      // Random heading change
-      if (now - lastRandomTurn.current > turningCooldown) {
-        lastRandomTurn.current = now;
-        heading.current += (Math.random() - 0.5) * turnJitter;
+      const movement = motion.current;
+      movement.x = group.current.position.x;
+      movement.z = group.current.position.z;
+      if (villageResident && terrainTheme === "village") {
+        stepVillageWalk(movement, speed * 60, dt);
+      } else {
+        stepWander(movement, speed * 60, dt, worldBounds(terrainTheme));
       }
-
-      const { x, z } = group.current.position;
-      const max = wanderBounds * 0.9;
-
-      if (Math.abs(x) > max || Math.abs(z) > max) {
-        if (bounceAtEdge) {
-          // ⬅️ Bounce: instantly flip heading back inside
-          heading.current += Math.PI; // turn 180 degrees
-        } else {
-          // ⬅️ Steer softly back toward center
-          const angleToCenter = Math.atan2(-z, -x);
-          heading.current = THREE.MathUtils.lerp(
-            heading.current,
-            angleToCenter,
-            0.35,
-          );
-        }
-      }
-
-      // Smoothly rotate toward heading
-      const currentQuat = group.current.quaternion;
-      targetQuat.current.setFromEuler(new THREE.Euler(0, heading.current, 0));
-      const t = 1 - Math.pow(1 - steerEase, dt * 60);
-      currentQuat.slerp(targetQuat.current, t);
-
-      // Move forward
-      const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(
-        group.current.quaternion,
+      group.current.position.x = movement.x;
+      group.current.position.z = movement.z;
+      targetQuat.current.setFromAxisAngle(
+        THREE.Object3D.DEFAULT_UP,
+        movement.heading,
       );
-      group.current.position.addScaledVector(forward, speed * dt * 60);
-
-      // ✅ Hard clamp inside bounds
-      group.current.position.x = THREE.MathUtils.clamp(
-        group.current.position.x,
-        -wanderBounds,
-        wanderBounds,
-      );
-      group.current.position.z = THREE.MathUtils.clamp(
-        group.current.position.z,
-        -wanderBounds,
-        wanderBounds,
+      group.current.quaternion.slerp(
+        targetQuat.current,
+        1 - Math.exp(-10 * Math.min(dt, 0.1)),
       );
     }
 
@@ -207,4 +182,3 @@ export default function AnimatedModel({
     </group>
   );
 }
-
