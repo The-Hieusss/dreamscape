@@ -1,3 +1,4 @@
+import FirstPersonController from "./roaming/FirstPersonController";
 import WoodlandGroundcover, {
   isWoodlandGroundcover,
 } from "./WoodlandGroundcover";
@@ -33,7 +34,9 @@ function SceneContent({
   onMove,
   rotationTool,
   onRotate,
+  roaming,
 }: {
+  roaming: boolean;
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;
@@ -59,12 +62,26 @@ function SceneContent({
   }, [camera, movementRef, onMove]);
 
   useEffect(() => {
-    if (world?.theme === "woodland" && camera.name === "woodland-camera") {
+    if (
+      !roaming &&
+      world?.theme === "woodland" &&
+      camera.name === "woodland-camera"
+    ) {
       camera.position.set(3.4, 3.3, 17);
       camera.lookAt(-2.5, 2, -12);
       camera.updateProjectionMatrix();
     }
     if (
+      !roaming &&
+      world?.theme === "desert" &&
+      camera.name === "desert-camera"
+    ) {
+      camera.position.set(15, 10, 26);
+      camera.lookAt(-3, 3, -26);
+      camera.updateProjectionMatrix();
+    }
+    if (
+      !roaming &&
       world?.theme === "city" &&
       camera instanceof THREE.OrthographicCamera &&
       camera.name === "city-camera"
@@ -74,11 +91,12 @@ function SceneContent({
       camera.lookAt(0, 5, 2);
       camera.updateProjectionMatrix();
     }
-  }, [world, camera, size.width, size.height]);
+  }, [world, camera, size.width, size.height, roaming]);
 
   const handleDrop = useCallback(
     (event: DragEvent) => {
       event.preventDefault();
+      if (roaming) return;
       const path = event.dataTransfer?.getData("application/object-path");
       const name = event.dataTransfer?.getData("application/object-name");
       const category = event.dataTransfer?.getData(
@@ -113,7 +131,7 @@ function SceneContent({
         });
       }
     },
-    [gl, camera, scene, onAddObject, pointer, raycaster],
+    [gl, camera, scene, onAddObject, pointer, raycaster, roaming],
   );
 
   useEffect(() => {
@@ -131,7 +149,7 @@ function SceneContent({
 
   return (
     <>
-      {world?.theme === "woodland" && (
+      {world?.theme === "woodland" && !roaming && (
         <PerspectiveCamera
           name="woodland-camera"
           makeDefault
@@ -141,16 +159,28 @@ function SceneContent({
           far={200}
         />
       )}
+      {world?.theme === "desert" && !roaming && (
+        <PerspectiveCamera
+          makeDefault
+          name="desert-camera"
+          position={[15, 10, 26]}
+          fov={60}
+          near={0.1}
+          far={500}
+        />
+      )}
       {world?.theme === "city" && (
         <>
-          <OrthographicCamera
-            name="city-camera"
-            makeDefault
-            position={[65, 52, 65]}
-            zoom={Math.min(size.width / 95, size.height / 75)}
-            near={0.1}
-            far={500}
-          />
+          {!roaming && (
+            <OrthographicCamera
+              name="city-camera"
+              makeDefault
+              position={[65, 52, 65]}
+              zoom={Math.min(size.width / 95, size.height / 75)}
+              near={0.1}
+              far={500}
+            />
+          )}
           <ContactShadows
             position={[0, 0.02, 0]}
             scale={100}
@@ -159,6 +189,18 @@ function SceneContent({
             blur={2.5}
             resolution={512}
           />
+        </>
+      )}
+      {roaming && (
+        <>
+          <PerspectiveCamera
+            makeDefault
+            name="roaming-camera"
+            fov={70}
+            near={0.05}
+            far={500}
+          />
+          <FirstPersonController theme={world?.theme} />
         </>
       )}
       <color attach="background" args={[world?.sky_color ?? "#88ccff"]} />
@@ -177,9 +219,10 @@ function SceneContent({
           <WoodlandGroundcover
             objects={objects.filter(
               (object) =>
-                isWoodlandGroundcover(object) && object.editorId !== selectedId,
+                isWoodlandGroundcover(object) &&
+                (roaming || object.editorId !== selectedId),
             )}
-            onSelect={onSelect}
+            onSelect={roaming ? () => {} : onSelect}
           />
         )}
         {objects
@@ -187,40 +230,49 @@ function SceneContent({
             (object) =>
               world?.theme !== "woodland" ||
               !isWoodlandGroundcover(object) ||
-              object.editorId === selectedId,
+              (!roaming && object.editorId === selectedId),
           )
           .map((o) => (
             <SelectableObject
               key={o.editorId}
               object={o}
               theme={world?.theme}
-              selected={o.editorId === selectedId}
-              onSelect={() => onSelect(o.editorId ?? null)}
-              rotationTool={rotationTool}
+              selected={!roaming && o.editorId === selectedId}
+              onSelect={() => {
+                if (!roaming) onSelect(o.editorId ?? null);
+              }}
+              rotationTool={
+                roaming ? { ...rotationTool, enabled: false } : rotationTool
+              }
               onRotate={(rotation) =>
                 o.editorId && onRotate(o.editorId, rotation)
               }
             />
           ))}
       </Suspense>
-      <OrbitControls
-        makeDefault
-        target={
-          world?.theme === "city"
-            ? [0, 5, 2]
-            : world?.theme === "woodland"
-              ? [-2.5, 2, -12]
-              : [0, 0, 0]
-        }
-        enableDamping
-        dampingFactor={0.12}
-        maxPolarAngle={Math.PI / 2 - 0.05}
-      />
+      {!roaming && (
+        <OrbitControls
+          makeDefault
+          target={
+            world?.theme === "city"
+              ? [0, 5, 2]
+              : world?.theme === "woodland"
+                ? [-2.5, 2, -12]
+                : world?.theme === "desert"
+                  ? [-3, 3, -26]
+                  : [0, 0, 0]
+          }
+          enableDamping
+          dampingFactor={0.12}
+          maxPolarAngle={Math.PI / 2 - 0.05}
+        />
+      )}
     </>
   );
 }
 
 export default function SceneManager(props: {
+  roaming: boolean;
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;
@@ -236,7 +288,7 @@ export default function SceneManager(props: {
       shadows
       camera={{ position: [10, 15, 20], fov: 60 }}
       onPointerMissed={() => {
-        if (!props.rotationTool.enabled) props.onSelect(null);
+        if (!props.roaming && !props.rotationTool.enabled) props.onSelect(null);
       }}
     >
       <SceneContent {...props} />

@@ -1,10 +1,11 @@
+import { Sky } from "@react-three/drei";
+import DesertLandscape from "./DesertLandscape";
 import { CITY_BLOCK_CENTERS, CITY_PAVEMENT_TOP } from "../lib/cityLayout";
 import WoodlandTerrain from "./WoodlandTerrain";
 import { OCEAN_FLOOR } from "../lib/ocean";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { getTerrainHeight } from "@/lib/terrain";
 
 function ProceduralTerrain({
   color,
@@ -38,86 +39,6 @@ function ProceduralTerrain({
   );
 }
 
-export function DesertTerrain() {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  const { geometry, baseHeights } = useMemo(() => {
-    const size = 420;
-    const segs = 180;
-    const geom = new THREE.PlaneGeometry(size, size, segs, segs);
-    geom.rotateX(-Math.PI / 2);
-
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    const base: number[] = [];
-    const cols: number[] = [];
-
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      const z = pos.getZ(i);
-      const h = getTerrainHeight(x, z);
-      base.push(h);
-
-      pos.setY(i, h);
-
-      const norm = (h + 5) / 12; // rough normalize
-      const clamp = Math.min(1, Math.max(0, norm));
-
-      // Base gradient
-      const c1 = new THREE.Color("#b88a42"); // low
-      const c2 = new THREE.Color("#dcb879"); // mid
-      const c3 = new THREE.Color("#f7e5bd"); // crest
-      const mixed = c1
-        .clone()
-        .lerp(c2, clamp)
-        .lerp(c3, clamp * clamp);
-
-      cols.push(mixed.r, mixed.g, mixed.b);
-    }
-
-    geom.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
-    geom.computeVertexNormals();
-
-    return { geometry: geom, baseHeights: base, colors: cols };
-  }, []);
-
-  // Subtle heat shimmer / dune drift
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
-    const pos = (meshRef.current.geometry as THREE.BufferGeometry).attributes
-      .position as THREE.BufferAttribute;
-    for (let i = 0; i < pos.count; i++) {
-      const y0 = baseHeights[i];
-      // tiny animated ripple (wind)
-      const x = pos.getX(i);
-      const z = pos.getZ(i);
-      const ripple =
-        Math.sin((x + t * 4) * 0.03) * 0.08 +
-        Math.cos((z - t * 3) * 0.03) * 0.06;
-      pos.setY(i, y0 + ripple);
-    }
-    pos.needsUpdate = true;
-    meshRef.current.geometry.computeVertexNormals();
-  });
-
-  return (
-    <mesh
-      name="terrain"
-      ref={meshRef}
-      geometry={geometry}
-      receiveShadow
-      castShadow
-    >
-      <meshStandardMaterial
-        vertexColors
-        roughness={0.95}
-        metalness={0.05}
-        emissive="#2b1403"
-        emissiveIntensity={0.08}
-      />
-    </mesh>
-  );
-}
 export function OceanTerrain() {
   const waterRef = useRef<THREE.Mesh>(null);
 
@@ -348,13 +269,36 @@ export default function ThemeRenderer({ theme }: { theme: string }) {
     case "desert":
       return (
         <>
-          <ambientLight intensity={0.7} />
-          <directionalLight
-            position={[100, 100, 0]}
-            intensity={1.0}
-            color="yellow"
+          <Sky
+            distance={45000}
+            sunPosition={[60, 25, -100]}
+            turbidity={6}
+            rayleigh={0.6}
+            mieCoefficient={0.005}
+            mieDirectionalG={0.8}
           />
-          <DesertTerrain />
+          <fog attach="fog" args={["#dbc7a4", 65, 180]} />
+          <ambientLight intensity={0.6} />
+          <hemisphereLight args={["#e6f0ff", "#b8844d", 1]} />
+          <directionalLight
+            position={[45, 30, -65]}
+            intensity={3}
+            color="#ffe3b0"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-70}
+            shadow-camera-right={70}
+            shadow-camera-top={70}
+            shadow-camera-bottom={-70}
+            shadow-camera-far={200}
+            shadow-normalBias={0.05}
+          />
+          <directionalLight
+            position={[-20, 15, 30]}
+            intensity={0.65}
+            color="#e9efff"
+          />
+          <DesertLandscape />
         </>
       );
     case "ocean":

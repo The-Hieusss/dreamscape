@@ -1,3 +1,4 @@
+import { desertObjects } from "./desertPreset";
 import { woodlandObjects } from "./woodlandPreset";
 import { cityObjects } from "./cityPreset";
 import type { World } from "./types";
@@ -39,11 +40,8 @@ export const themePresets: Record<string, Partial<World>> = {
   ],
 },
   desert: {
-    sky_color: "#ffcc88",
-    terrain: "flat plains",
-    objects: [
-      { type: "rock", modelPath: "/models/Rock Large.glb", quantity: 20, position: "random", size:"small" },
-    ],
+    sky_color: "#d3dce0",
+    terrain: "mountainous",
+    objects: desertObjects,
   },
 };
-

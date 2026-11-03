@@ -91,3 +91,15 @@ small park. Pavement and road heights are shared with object placement, so movin
 objects between streets and sidewalks keeps them grounded. Street fixtures and
 cars are individual editable objects; the cars are static rather than simulated
 traffic.
+
+## Desert landscape preset
+
+**Desert** uses a shared procedural height field for dunes, a winding dry wash,
+and four irregular sandstone mesas. Static shader detail adds wind ripples to
+sand and strata to rock faces without moving the terrain or recomputing normals
+every frame. Existing cactus and MegaKit rock, deadwood, pebble, and dry-grass
+models form seeded clusters around the wash. Scenery remains individually editable.
+
+The editor opens with a view down the basin. **Explore on foot** starts in the
+clear wash and uses the same height function as rendering and object placement.
+No additional model downloads are needed for this preset.

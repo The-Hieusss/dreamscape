@@ -32,7 +32,7 @@ const presets: { theme: WorldTheme; label: string; detail: string }[] = [
   {
     theme: "desert",
     label: "Desert",
-    detail: "Sand dunes and scattered rocks",
+    detail: "Wind-carved dunes, sandstone mesas, cactus colonies and a dry wash",
   },
   { theme: "universe", label: "Space", detail: "Stars, sun and moon" },
 ];

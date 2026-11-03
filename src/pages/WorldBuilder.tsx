@@ -69,6 +69,7 @@ export default function WorldBuilder() {
     enabled: false,
     snap: false,
   });
+  const [roaming, setRoaming] = useState(false);
   const [objects, setObjects] = useState<SceneObject[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [removed, setRemoved] = useState<{
@@ -195,6 +196,7 @@ export default function WorldBuilder() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (roaming) return;
       const target = event.target;
       if (
         target instanceof Element &&
@@ -211,7 +213,7 @@ export default function WorldBuilder() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [removeSelected, selectedId]);
+  }, [removeSelected, selectedId, roaming]);
 
   function applyTheme(theme: string) {
     const preset = themePresets[theme];
@@ -297,6 +299,7 @@ export default function WorldBuilder() {
   return (
     <div className="relative w-screen h-screen md:h-screen overflow-hidden">
       <SceneManager
+        roaming={roaming}
         objects={objects}
         world={world}
         onAddObject={addObject}
@@ -308,27 +311,31 @@ export default function WorldBuilder() {
         onMove={moveSelected}
       />
 
-      <SceneObjectControls
-        objects={objects}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-        onUpdate={updateSelected}
-        rotationTool={rotationTool}
-        onRotationToolChange={setRotationTool}
-        onMove={(direction, distance) =>
-          movementRef.current?.(direction, distance)
-        }
-        onRemove={removeSelected}
-        onUndo={undoRemove}
-        canUndo={!!removed}
-      />
+      {!roaming && (
+        <>
+          <SceneObjectControls
+            objects={objects}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onUpdate={updateSelected}
+            rotationTool={rotationTool}
+            onRotationToolChange={setRotationTool}
+            onMove={(direction, distance) =>
+              movementRef.current?.(direction, distance)
+            }
+            onRemove={removeSelected}
+            onUndo={undoRemove}
+            canUndo={!!removed}
+          />
 
-      <Sidebar
-        addedCount={objects.filter((object) => !object.presetTheme).length}
-        theme={world?.theme}
-        onThemeChange={applyTheme}
-        onAddObject={addObject}
-      />
+          <Sidebar
+            addedCount={objects.filter((object) => !object.presetTheme).length}
+            theme={world?.theme}
+            onThemeChange={applyTheme}
+            onAddObject={addObject}
+          />
+        </>
+      )}
 
       {error && (
         <p
@@ -338,39 +345,40 @@ export default function WorldBuilder() {
           {error}
         </p>
       )}
-      <form
-        onSubmit={handleCommandSubmit}
-        className="command-bar absolute inset-x-2 bottom-2 md:bottom-6 md:left-1/2 md:-translate-x-1/2
+      {!roaming && (
+        <form
+          onSubmit={handleCommandSubmit}
+          className="command-bar absolute inset-x-2 bottom-2 md:bottom-6 md:left-1/2 md:-translate-x-1/2
                    w-[calc(100%-1rem)] md:w-3/4 md:max-w-3xl
                    flex items-stretch md:items-center gap-2 md:gap-3
                    px-3 md:px-5 py-2.5 md:py-3.5
                    rounded-2xl md:rounded-3xl
                    transition-all duration-300"
-      >
-        {/* Input */}
-        <div className="flex items-center flex-1 relative">
-          <span className="absolute left-3 text-white/35 hidden md:inline text-sm">
-            ⌨️
-          </span>
-          <input
-            type="text"
-            placeholder="Optional: describe a change with AI…"
-            className="flex-1 pl-3 md:pl-10 pr-3 py-2.5 rounded-xl
+        >
+          {/* Input */}
+          <div className="flex items-center flex-1 relative">
+            <span className="absolute left-3 text-white/35 hidden md:inline text-sm">
+              ⌨️
+            </span>
+            <input
+              type="text"
+              placeholder="Optional: describe a change with AI…"
+              className="flex-1 pl-3 md:pl-10 pr-3 py-2.5 rounded-xl
                        bg-white/10/50 focus:bg-white/10
                        text-white/90 text-sm md:text-base tracking-wide
                        placeholder-white/40 font-body
                        outline-none ring-1 ring-white/15 focus:ring-2 focus:ring-dream-indigo/60
                        transition-all"
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-          />
-        </div>
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+            />
+          </div>
 
-        {/* Run button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="relative group overflow-hidden
+          {/* Run button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="relative group overflow-hidden
                      px-5 md:px-7 py-2.5
                      rounded-xl font-semibold text-sm md:text-base
                      text-slate-900
@@ -379,39 +387,59 @@ export default function WorldBuilder() {
                      hover:shadow-[0_6px_26px_-4px_rgba(236,72,153,0.65)]
                      hover:scale-[1.035] active:scale-95
                      transition disabled:opacity-50 disabled:scale-100"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              {loading ? (
+                <svg
+                  className="animate-spin h-5 w-5 text-white/90"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <span className="hidden sm:inline drop-shadow">🚀</span>
+                  Ask AI
+                </span>
+              )}
+            </span>
+            <span className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white/30 transition" />
+          </button>
+        </form>
+      )}
+      <div className="absolute left-1/2 top-3 z-30 -translate-x-1/2 max-w-[calc(100vw-1.5rem)] rounded-xl border border-white/20 bg-slate-950/85 p-2 text-white shadow-lg backdrop-blur">
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedId(null);
+            setRotationTool((tool) => ({ ...tool, enabled: false }));
+            setRoaming((value) => !value);
+          }}
+          className="whitespace-nowrap rounded-lg bg-indigo-500 px-3 py-2 text-sm font-medium hover:bg-indigo-400"
         >
-          <span className="relative z-10 flex items-center gap-2">
-            {loading ? (
-              <svg
-                className="animate-spin h-5 w-5 text-white/90"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-            ) : (
-              <span className="flex items-center gap-2">
-                <span className="hidden sm:inline drop-shadow">🚀</span>
-                Ask AI
-              </span>
-            )}
-          </span>
-          <span className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white/30 transition" />
+          {roaming ? "Back to build" : "Explore on foot"}
         </button>
-      </form>
+        {roaming && (
+          <p className="mt-2 max-w-sm text-xs text-white/75">
+            Click the scene to start. WASD / arrows: walk · Shift: faster ·
+            Mouse: look · Esc: pause. Drag to look if mouse lock is unavailable.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
