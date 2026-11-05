@@ -1,7 +1,8 @@
+import { CollisionContext } from "../lib/collisionContext";
 import { TransformControls } from "@react-three/drei";
 import { modelAnimations } from "../lib/modelAnimations";
 import type { Rotation, RotationTool } from "../lib/objectRotation";
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { ObjectFactory } from "./ObjectFactory";
@@ -24,6 +25,57 @@ export default function SelectableObject({
 }) {
   const target = useRef<THREE.Group>(null!);
   const group = useRef<THREE.Group>(null);
+  const collisions = useContext(CollisionContext);
+  useLayoutEffect(() => {
+    const root = target.current;
+    if (
+      !collisions ||
+      !root ||
+      !object.modelPath ||
+      modelAnimations(object.modelPath).length
+    )
+      return;
+    const label = `${object.type} ${object.modelPath.split("/").pop()}`;
+    if (
+      /\b(path|road|pavement|sidewalk|crosswalk|grass|flower|hay|decal|cloud|star)\b/i.test(
+        label,
+      )
+    )
+      return;
+    if (
+      !/building|house|barn|silo|coop|windmill|mill|tower|fence|wall|rock|boulder|tree|bench|well|stall|car|cart|dumpster|inn|stable|barracks|blacksmith|gazebo|skyscraper/i.test(
+        label,
+      )
+    )
+      return;
+    root.updateWorldMatrix(true, true);
+    const yaw = root.rotation.y;
+    const inverseYaw = new THREE.Matrix4().makeRotationY(-yaw);
+    const matrix = new THREE.Matrix4();
+    const box = new THREE.Box3();
+    const meshBox = new THREE.Box3();
+    root.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+      if (!child.geometry.boundingBox) return;
+      matrix.multiplyMatrices(inverseYaw, child.matrixWorld);
+      box.union(meshBox.copy(child.geometry.boundingBox).applyMatrix4(matrix));
+    });
+    if (box.isEmpty() || box.max.y - box.min.y <= 0.2) return;
+    collisions.set(root, {
+      yaw,
+      minX: box.min.x,
+      maxX: box.max.x,
+      minZ: box.min.z,
+      maxZ: box.max.z,
+      minY: box.min.y,
+      maxY: box.max.y,
+    });
+    return () => {
+      collisions.remove(root);
+    };
+  }, [collisions, object, theme]);
+
   const outline = useMemo(() => {
     const helper = new THREE.BoxHelper(new THREE.Group(), "#fbbf24");
     helper.raycast = () => {};

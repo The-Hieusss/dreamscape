@@ -38,14 +38,23 @@ export function Model({
       }
     });
 
-    if (centerOnGround) {
+    // Ultimate models are exported as groups laid out on a shared asset sheet.
+    const centerOnPlacement = path.startsWith(
+      "/models/Nature/Ultimate Stylized Nature Pack/",
+    );
+    if (centerOnGround || centerOnPlacement) {
       const box = new THREE.Box3().setFromObject(cloned);
-      const yOffset = -box.min.y;
-      cloned.position.y += yOffset;
+      if (!box.isEmpty()) {
+        if (centerOnGround) cloned.position.y -= box.min.y;
+        if (centerOnPlacement) {
+          cloned.position.x -= (box.min.x + box.max.x) / 2;
+          cloned.position.z -= (box.min.z + box.max.z) / 2;
+        }
+      }
     }
 
     return cloned;
-  }, [scene, cloneSkinned, centerOnGround, foliage]);
+  }, [scene, path, cloneSkinned, centerOnGround, foliage]);
 
   return (
     <group {...props} scale={scale}>

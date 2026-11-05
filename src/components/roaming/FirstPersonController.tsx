@@ -1,5 +1,6 @@
+import { CollisionContext } from "../../lib/collisionContext";
 import { worldBounds } from "../../lib/wandering";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { WorldTheme } from "../../lib/types";
 import { getTerrainHeight } from "../../lib/terrain";
@@ -36,6 +37,7 @@ export default function FirstPersonController({
   onPose?: (pose: PlayerPose) => void;
 }) {
   const { camera, gl } = useThree();
+  const collisions = useContext(CollisionContext);
   const keys = useRef(new Set<string>());
   const yaw = useRef(0),
     pitch = useRef(0);
@@ -165,8 +167,15 @@ export default function FirstPersonController({
     const [x, z] = active
       ? walkingStep(yaw.current, keys.current, delta)
       : [0, 0];
-    camera.position.x += x;
-    camera.position.z += z;
+    const from = camera.position;
+    const desired = { x: from.x + x, z: from.z + z };
+    const next =
+      (x || z) && collisions
+        ? collisions.move(from, desired, from.y - EYE_HEIGHT, 0.28)
+        : desired;
+    const moved = next.x !== from.x || next.z !== from.z;
+    camera.position.x = next.x;
+    camera.position.z = next.z;
     if (sharedSlot !== undefined) {
       const bounds = worldBounds(theme);
       camera.position.x = Math.max(
@@ -189,12 +198,11 @@ export default function FirstPersonController({
       y: ground,
       z: camera.position.z,
       yaw: yaw.current,
-      motion:
-        x || z
-          ? keys.current.has("ShiftLeft") || keys.current.has("ShiftRight")
-            ? "Run"
-            : "Walk"
-          : "Idle",
+      motion: moved
+        ? keys.current.has("ShiftLeft") || keys.current.has("ShiftRight")
+          ? "Run"
+          : "Walk"
+        : "Idle",
     });
   });
   return null;

@@ -1,3 +1,5 @@
+import type { CollisionMap, Point } from "./collisions";
+
 export interface WorldBounds {
   minX: number;
   maxX: number;
@@ -92,6 +94,7 @@ connect(farmStart + 2, farmStart + 5);
 export interface VillageWalk extends WanderState {
   target: number;
   previous: number;
+  detour?: { revision: number; target: number; points: Point[] };
 }
 export function createVillageWalk(x: number, z: number): VillageWalk {
   let target = 0;
@@ -109,16 +112,49 @@ export function stepVillageWalk(
   speed: number,
   dt: number,
   random = Math.random,
+  collisions?: CollisionMap,
 ) {
   const bounds = worldBounds("village");
   state.x = clamp(state.x, bounds.minX, bounds.maxX);
   state.z = clamp(state.z, bounds.minZ, bounds.maxZ);
+  state.turnIn -= dt;
+  if (state.turnIn > 0) return;
   let remaining = Math.max(0, speed) * clamp(dt, 0, 0.1);
   // Consume remaining distance through junctions without overshooting or jitter.
   for (let i = 0; i < 8 && remaining > 0; i++) {
     const target = villageLanes[state.target];
-    const dx = target.x - state.x,
-      dz = target.z - state.z,
+    let waypoint: Point = target;
+    if (collisions) {
+      // Plan only when the destination or scenery changes.
+      if (
+        state.detour?.revision !== collisions.revision ||
+        state.detour.target !== state.target
+      ) {
+        const points = collisions.route(state, target, bounds, 0, 0.3);
+        if (!points) {
+          const candidates = [...target.neighbors, state.previous].filter(
+            (index) =>
+              index >= 0 &&
+              index !== state.target &&
+              collisions.clear(state, villageLanes[index], 0, 0.3),
+          );
+          if (candidates.length) {
+            state.previous = state.target;
+            state.target = candidates[Math.floor(random() * candidates.length)];
+          }
+          state.turnIn = 0.8;
+          return;
+        }
+        state.detour = {
+          revision: collisions.revision,
+          target: state.target,
+          points,
+        };
+      }
+      waypoint = state.detour.points[0] ?? target;
+    }
+    const dx = waypoint.x - state.x,
+      dz = waypoint.z - state.z,
       distance = Math.hypot(dx, dz);
     if (distance > 0.001) {
       state.heading = Math.atan2(dx, dz);
@@ -127,6 +163,10 @@ export function stepVillageWalk(
       state.z += (dz / distance) * step;
       remaining -= step;
       if (step < distance) break;
+    }
+    if (state.detour && state.detour.points.length > 1) {
+      state.detour.points.shift();
+      continue;
     }
     const choices = target.neighbors.filter((n) => n !== state.previous);
     const next = choices.length

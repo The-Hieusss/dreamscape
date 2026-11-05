@@ -1,3 +1,4 @@
+import { CollisionContext } from "../lib/collisionContext";
 import {
   createVillageWalk,
   stepVillageWalk,
@@ -8,7 +9,7 @@ import { getSwimmingHeight } from "../lib/ocean";
 import type { WorldTheme } from "../lib/types";
 // filepath: src/components/AnimatedModel.tsx
 import { useGLTF, useAnimations } from "@react-three/drei";
-import { useEffect, useRef, useMemo } from "react";
+import { useContext, useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
@@ -53,6 +54,7 @@ export default function AnimatedModel({
   ...props
 }: AnimatedModelProps & JSX.IntrinsicElements["group"]) {
   const group = useRef<THREE.Group>(null);
+  const collisions = useContext(CollisionContext);
   const targetQuat = useRef(new THREE.Quaternion());
   const motion = useRef(createVillageWalk(0, 0));
   useEffect(() => {
@@ -139,9 +141,24 @@ export default function AnimatedModel({
       movement.x = group.current.position.x;
       movement.z = group.current.position.z;
       if (villageResident && terrainTheme === "village") {
-        stepVillageWalk(movement, speed * 60, dt);
+        stepVillageWalk(
+          movement,
+          speed * 60,
+          dt,
+          Math.random,
+          collisions ?? undefined,
+        );
       } else {
+        const from = group.current.position;
         stepWander(movement, speed * 60, dt, worldBounds(terrainTheme));
+        if (collisions && !swimInWater) {
+          const next = collisions.move(from, movement, from.y, 0.3);
+          if (next.x !== movement.x || next.z !== movement.z) {
+            movement.heading += Math.PI + (Math.random() - 0.5) * 0.6;
+          }
+          movement.x = next.x;
+          movement.z = next.z;
+        }
       }
       group.current.position.x = movement.x;
       group.current.position.z = movement.z;

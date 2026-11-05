@@ -1,3 +1,5 @@
+import { CollisionContext } from "../lib/collisionContext";
+import { CollisionMap } from "../lib/collisions";
 import type { ReactNode } from "react";
 import type { PlayerPose } from "./roaming/FirstPersonController";
 import FirstPersonController from "./roaming/FirstPersonController";
@@ -322,6 +324,7 @@ export default function SceneManager(props: {
   rotationTool: RotationTool;
   onRotate: (id: string, rotation: Rotation) => void;
 }) {
+  const [collisions] = useState(() => new CollisionMap());
   return (
     <Canvas
       shadows
@@ -330,7 +333,9 @@ export default function SceneManager(props: {
         if (!props.roaming && !props.rotationTool.enabled) props.onSelect(null);
       }}
     >
-      <SceneContent {...props} />
+      <CollisionContext.Provider value={collisions}>
+        <SceneContent {...props} />
+      </CollisionContext.Provider>
     </Canvas>
   );
 }
