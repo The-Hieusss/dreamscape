@@ -1,9 +1,7 @@
+import ExploreRoom from "./pages/ExploreRoom";
+import MyWorlds from "./pages/MyWorlds";
 import { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SplashScreen from "./pages/SplashScreen";
 import Home from "./pages/Home";
 import Login from "./pages/LogIn";
@@ -31,7 +29,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={<Home />} />
-        <Route path="/world-builder" element={<WorldBuilder />} />
+        <Route path="/world-builder/:worldId?" element={<WorldBuilder />} />
+        <Route path="/my-worlds" element={<MyWorlds />} />
+        <Route path="/explore/:roomId" element={<ExploreRoom />} />
       </Routes>
     </Router>
   );

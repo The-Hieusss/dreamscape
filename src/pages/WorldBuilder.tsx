@@ -1,3 +1,14 @@
+import {
+  Link,
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import { loadWorld, restoreDraft, saveWorld } from "../lib/worldStorage";
+import type { SavedWorld, SceneSnapshot } from "../lib/worldStorage";
+import { loginUrl, useSession } from "../lib/useSession";
+import supabase from "../lib/supabase/client";
 import type { Rotation, RotationTool } from "../lib/objectRotation";
 import type { MoveDirection } from "../lib/objectMovement";
 import SceneObjectControls from "../components/SceneObjectControls";
@@ -62,6 +73,49 @@ function normalizeSkyColor(v?: string): string | undefined {
 }
 
 export default function WorldBuilder() {
+  const { worldId } = useParams();
+  const session = useSession();
+  const [search] = useSearchParams();
+  const draftId = search.get("draft");
+  const localKey =
+    draftId && /^[a-f0-9-]{36}$/i.test(draftId) ? draftId : "local";
+  if (worldId && session === undefined) return <p>Checking your session…</p>;
+  if (worldId && !session)
+    return <Navigate to={loginUrl(window.location.pathname)} replace />;
+  return (
+    <WorldEditor
+      key={worldId ?? localKey}
+      worldId={worldId}
+      localKey={localKey}
+      signedIn={!!session}
+    />
+  );
+}
+
+function WorldEditor({
+  worldId,
+  localKey,
+  signedIn,
+}: {
+  worldId?: string;
+  localKey: string;
+  signedIn: boolean;
+}) {
+  const navigate = useNavigate();
+  const draftKey = `dreamscape:draft:${worldId ?? localKey}`;
+  const [draft] = useState(() => restoreDraft(draftKey));
+  const [saved, setSaved] = useState<SavedWorld | null>(null);
+  const [name, setName] = useState(
+    worldId ? "" : (draft?.name ?? "Untitled World"),
+  );
+  const [ready, setReady] = useState(!worldId);
+  const [saveError, setSaveError] = useState("");
+  const [draftError, setDraftError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [recoveredCopy, setRecoveredCopy] = useState(false);
+  const [staleDraft, setStaleDraft] = useState(false);
+  const saveLock = useRef(false);
+
   const movementRef = useRef<
     ((direction: MoveDirection, distance: number) => void) | null
   >(null);
@@ -70,16 +124,124 @@ export default function WorldBuilder() {
     snap: false,
   });
   const [roaming, setRoaming] = useState(false);
-  const [objects, setObjects] = useState<SceneObject[]>([]);
+  const [objects, setObjects] = useState<SceneObject[]>(
+    worldId ? [] : (draft?.scene.objects ?? []),
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [removed, setRemoved] = useState<{
     object: SceneObject;
     index: number;
   } | null>(null);
-  const [world, setWorld] = useState<World | null>(null);
+  const [world, setWorld] = useState<World | null>(() =>
+    !worldId && draft?.scene.settings
+      ? { ...draft.scene.settings, objects: [] }
+      : null,
+  );
   const [command, setCommand] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!worldId) return;
+    let active = true;
+    void loadWorld(worldId)
+      .then((record) => {
+        if (!active) return;
+        const canRecover = draft?.revision === record.revision;
+        const scene = canRecover ? draft.scene : record.scene;
+        setSaved(record);
+        setName(canRecover ? draft.name : record.name);
+        setWorld(scene.settings ? { ...scene.settings, objects: [] } : null);
+        setObjects(scene.objects);
+        setStaleDraft(
+          !!draft &&
+            !canRecover &&
+            JSON.stringify(draft.scene) !== JSON.stringify(record.scene),
+        );
+        setReady(true);
+      })
+      .catch((error: Error) => {
+        if (active) setSaveError(error.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [worldId, draft]);
+
+  const sceneSnapshot: SceneSnapshot = {
+    schemaVersion: 1,
+    settings: world
+      ? {
+          name: world.name,
+          theme: world.theme,
+          sky_color: world.sky_color,
+          terrain: world.terrain,
+          mood: world.mood,
+        }
+      : null,
+    objects,
+  };
+  useEffect(() => {
+    if (!ready || staleDraft || recoveredCopy) return;
+    try {
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          name,
+          revision: saved?.revision ?? 0,
+          scene: sceneSnapshot,
+        }),
+      );
+      setDraftError("");
+    } catch {
+      setDraftError("This browser could not store your local draft.");
+    }
+    // Only persist scene edits and revision changes, not selection or camera state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    ready,
+    staleDraft,
+    recoveredCopy,
+    draftKey,
+    name,
+    saved?.revision,
+    world,
+    objects,
+  ]);
+
+  async function persist(explore: boolean) {
+    if (saveLock.current || !name.trim()) return;
+    saveLock.current = true;
+    setBusy(true);
+    setSaveError("");
+    try {
+      const record = await saveWorld(
+        name.trim(),
+        sceneSnapshot,
+        recoveredCopy ? null : saved,
+      );
+      setSaved(record);
+      if (recoveredCopy) setRecoveredCopy(false);
+      if (explore) {
+        const { data, error } = await supabase
+          .from("exploration_rooms")
+          .insert({ world_id: record.id, revision: record.revision })
+          .select("id")
+          .single();
+        if (error) throw new Error(error.message);
+        navigate(`/explore/${data.id}`);
+      } else if (record.id !== worldId) {
+        navigate(`/world-builder/${record.id}`, { replace: true });
+      }
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Unable to save this world.",
+      );
+    } finally {
+      saveLock.current = false;
+      setBusy(false);
+    }
+  }
 
   function placeObjects(
     existing: SceneObject[],
@@ -196,7 +358,7 @@ export default function WorldBuilder() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (roaming) return;
+      if (roaming || saveLock.current) return;
       const target = event.target;
       if (
         target instanceof Element &&
@@ -295,6 +457,16 @@ export default function WorldBuilder() {
       setLoading(false);
     }
   }
+
+  if (!ready)
+    return (
+      <main className="min-h-screen bg-slate-950 p-8 text-white">
+        <p role={saveError ? "alert" : "status"}>
+          {saveError || "Loading world…"}
+        </p>
+        <Link to="/my-worlds">Back to my worlds</Link>
+      </main>
+    );
 
   return (
     <div className="relative w-screen h-screen md:h-screen overflow-hidden">
@@ -433,6 +605,84 @@ export default function WorldBuilder() {
         >
           {roaming ? "Back to build" : "Explore on foot"}
         </button>
+        {!roaming && (
+          <details className="mt-2 text-sm">
+            <summary className="cursor-pointer">World</summary>
+            <div className="mt-2 flex max-w-64 flex-col gap-2">
+              <label className="flex flex-col gap-1">
+                World name
+                <input
+                  className="rounded bg-slate-800 p-2"
+                  maxLength={100}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
+              {signedIn ? (
+                <>
+                  <button
+                    className="rounded bg-indigo-600 p-2"
+                    disabled={busy || loading || !name.trim() || staleDraft}
+                    onClick={() => void persist(false)}
+                  >
+                    {busy
+                      ? "Saving…"
+                      : recoveredCopy
+                        ? "Save as a new world"
+                        : "Save world"}
+                  </button>
+                  <button
+                    className="rounded bg-slate-700 p-2"
+                    disabled={busy || loading || !name.trim() || staleDraft}
+                    onClick={() => void persist(true)}
+                  >
+                    Save and explore together
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to={loginUrl(
+                    window.location.pathname + window.location.search,
+                  )}
+                >
+                  Sign in to save to your account
+                </Link>
+              )}
+              <Link to="/my-worlds">My worlds</Link>
+              {staleDraft && (
+                <div className="space-y-2">
+                  <p>A local draft is based on an older version.</p>
+                  <button
+                    onClick={() => {
+                      if (!draft) return;
+                      setName(draft.name.slice(0, 88) + " (recovered)");
+                      setWorld(
+                        draft.scene.settings
+                          ? { ...draft.scene.settings, objects: [] }
+                          : null,
+                      );
+                      setObjects(draft.scene.objects);
+                      setRecoveredCopy(true);
+                      setStaleDraft(false);
+                    }}
+                  >
+                    Recover as a copy
+                  </button>
+                  <button onClick={() => setStaleDraft(false)}>
+                    Keep the cloud version
+                  </button>
+                </div>
+              )}
+              {saveError && <p role="alert">{saveError}</p>}
+              <p className="text-xs text-slate-300">
+                {draftError ||
+                  (saved
+                    ? `Cloud version ${saved.revision} · Local draft recovery`
+                    : "Draft kept on this device")}
+              </p>
+            </div>
+          </details>
+        )}
         {roaming && (
           <p className="mt-2 max-w-sm text-xs text-white/75">
             Click the scene to start. WASD / arrows: walk · Shift: faster ·
@@ -440,6 +690,16 @@ export default function WorldBuilder() {
           </p>
         )}
       </div>
+      {busy && (
+        <div
+          className="absolute inset-0 z-50 grid place-items-center bg-slate-950/40"
+          role="status"
+        >
+          <span className="rounded-lg bg-slate-950 px-4 py-2 text-white">
+            Saving world…
+          </span>
+        </div>
+      )}
     </div>
   );
 }

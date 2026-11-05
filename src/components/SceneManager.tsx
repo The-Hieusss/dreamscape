@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import type { PlayerPose } from "./roaming/FirstPersonController";
 import FirstPersonController from "./roaming/FirstPersonController";
 import WoodlandGroundcover, {
   isWoodlandGroundcover,
@@ -35,8 +37,14 @@ function SceneContent({
   rotationTool,
   onRotate,
   roaming,
+  sharedSlot,
+  onPose,
+  children,
 }: {
   roaming: boolean;
+  sharedSlot?: number;
+  onPose?: (pose: PlayerPose) => void;
+  children?: ReactNode;
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;
@@ -221,7 +229,11 @@ function SceneContent({
             near={0.05}
             far={500}
           />
-          <FirstPersonController theme={world?.theme} />
+          <FirstPersonController
+            theme={world?.theme}
+            sharedSlot={sharedSlot}
+            onPose={onPose}
+          />
         </>
       )}
       <color attach="background" args={[world?.sky_color ?? "#88ccff"]} />
@@ -270,6 +282,7 @@ function SceneContent({
               }
             />
           ))}
+        {children}
       </Suspense>
       {!roaming && (
         <OrbitControls
@@ -296,6 +309,9 @@ function SceneContent({
 
 export default function SceneManager(props: {
   roaming: boolean;
+  sharedSlot?: number;
+  onPose?: (pose: PlayerPose) => void;
+  children?: ReactNode;
   objects: SceneObject[];
   world: World | null;
   onAddObject: (o: SceneObject) => void;

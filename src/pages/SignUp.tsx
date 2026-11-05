@@ -1,5 +1,6 @@
+import { authDestination } from "../lib/useSession";
 import { useState, useEffect } from "react";
-import supabase from "../lib/supabase";
+import supabase from "../lib/supabase/client";
 import {
   Facebook,
   Instagram,
@@ -25,9 +26,11 @@ export default function SignUp() {
     setLoading(true);
     setError(null);
     setSuccess(false);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const destination = authDestination(window.location.search);
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + destination } });
     setLoading(false);
     if (error) setError(error.message);
+    else if (data.session) window.location.assign(destination);
     else setSuccess(true);
   }
 
@@ -203,7 +206,7 @@ export default function SignUp() {
           <p className="mt-8 text-center text-sm text-slate-400">
             Already have an account?{" "}
             <a
-              href="/login"
+              href={`/login${window.location.search}`}
               className="text-dream-pink hover:underline font-medium"
             >
               Log in

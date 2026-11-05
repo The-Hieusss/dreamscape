@@ -1,5 +1,6 @@
+import { authDestination } from "../lib/useSession";
 import { useState } from "react";
-import supabase from "../lib/supabase";
+import supabase from "../lib/supabase/client";
 import { Facebook, Instagram, Linkedin, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function Login() {
@@ -17,7 +18,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) setError(error.message);
-    else window.location.href = "/home";
+    else window.location.href = authDestination(window.location.search);
   }
 
   const valid = email.length > 3 && password.length >= 6;
@@ -131,7 +132,7 @@ export default function Login() {
             <p className="mt-8 text-center text-sm text-slate-400">
               Don&apos;t have an account?{" "}
               <a
-                href="/signup"
+                href={`/signup${window.location.search}`}
                 className="text-dream-pink hover:underline font-medium"
               >
                 Sign up

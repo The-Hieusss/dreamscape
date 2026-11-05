@@ -53,9 +53,9 @@ export default function Navbar() {
       </nav>
 
       {/* Right CTA (Desktop only) */}
-      <button className="hidden lg:block px-6 py-2 rounded-full bg-cyan-400 text-black font-semibold shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform duration-300">
-        Sign Up
-      </button>
+      <a href="/my-worlds" className="hidden lg:block px-6 py-2 rounded-full bg-cyan-400 text-black font-semibold shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform duration-300">
+        My worlds
+      </a>
 
       {/* Mobile Menu Toggle */}
       <button
@@ -84,9 +84,9 @@ export default function Navbar() {
           <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white hover:bg-dream-indigo transition">
             <Users className="h-5 w-5" /> Community
           </button>
-          <button className="px-8 py-3 rounded-full bg-cyan-400 text-black font-semibold shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform">
-            Sign Up
-          </button>
+          <a href="/my-worlds" className="px-8 py-3 rounded-full bg-cyan-400 text-black font-semibold shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:scale-105 transition-transform">
+            My worlds
+          </a>
         </div>
       )}
     </header>

@@ -1,3 +1,4 @@
+import { worldBounds } from "../../lib/wandering";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { WorldTheme } from "../../lib/types";
@@ -17,10 +18,22 @@ const WALK_KEYS = new Set([
   "ShiftRight",
 ]);
 
+export type PlayerPose = {
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+  motion: "Idle" | "Walk" | "Run";
+};
+
 export default function FirstPersonController({
   theme,
+  sharedSlot,
+  onPose,
 }: {
   theme?: WorldTheme;
+  sharedSlot?: number;
+  onPose?: (pose: PlayerPose) => void;
 }) {
   const { camera, gl } = useThree();
   const keys = useRef(new Set<string>());
@@ -32,16 +45,17 @@ export default function FirstPersonController({
   useLayoutEffect(() => {
     if (camera.name !== "roaming-camera") return;
     const start = roamStart(theme);
+    const z = start.z - (sharedSlot ?? 0) * 2;
     camera.position.set(
       start.x,
-      getTerrainHeight(start.x, start.z, theme) + EYE_HEIGHT,
-      start.z,
+      getTerrainHeight(start.x, z, theme) + EYE_HEIGHT,
+      z,
     );
     yaw.current = start.yaw;
     pitch.current = 0;
     keys.current.clear();
     camera.rotation.set(0, start.yaw, 0, "YXZ");
-  }, [camera, theme]);
+  }, [camera, theme, sharedSlot]);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -144,18 +158,44 @@ export default function FirstPersonController({
   useFrame((_, delta) => {
     if (camera.name !== "roaming-camera") return;
     camera.rotation.set(pitch.current, yaw.current, 0, "YXZ");
-    if (
-      document.hidden ||
-      (document.pointerLockElement !== gl.domElement &&
-        document.activeElement !== gl.domElement)
-    )
-      return;
-    const [x, z] = walkingStep(yaw.current, keys.current, delta);
+    const active =
+      !document.hidden &&
+      (document.pointerLockElement === gl.domElement ||
+        document.activeElement === gl.domElement);
+    const [x, z] = active
+      ? walkingStep(yaw.current, keys.current, delta)
+      : [0, 0];
     camera.position.x += x;
     camera.position.z += z;
-    camera.position.y =
-      getTerrainHeight(camera.position.x, camera.position.z, theme) +
-      EYE_HEIGHT;
+    if (sharedSlot !== undefined) {
+      const bounds = worldBounds(theme);
+      camera.position.x = Math.max(
+        bounds.minX,
+        Math.min(bounds.maxX, camera.position.x),
+      );
+      camera.position.z = Math.max(
+        bounds.minZ,
+        Math.min(bounds.maxZ, camera.position.z),
+      );
+    }
+    const ground = getTerrainHeight(
+      camera.position.x,
+      camera.position.z,
+      theme,
+    );
+    camera.position.y = ground + EYE_HEIGHT;
+    onPose?.({
+      x: camera.position.x,
+      y: ground,
+      z: camera.position.z,
+      yaw: yaw.current,
+      motion:
+        x || z
+          ? keys.current.has("ShiftLeft") || keys.current.has("ShiftRight")
+            ? "Run"
+            : "Walk"
+          : "Idle",
+    });
   });
   return null;
 }
