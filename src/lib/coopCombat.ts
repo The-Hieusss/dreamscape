@@ -21,7 +21,7 @@ export type CombatSnapshot = {
   enemies: { id: number; hp: number; pose: EnemyPose }[];
 };
 export type CombatCommand =
-  | { round: string; kind: "reload" }
+  | { round: string; kind: "reload" | "slash" }
   | { round: string; kind: "fire"; direction: [number, number, number] };
 
 const clips = new Set([
@@ -33,6 +33,8 @@ const clips = new Set([
   "Kick_Right",
   "Punch_Right",
   "Death",
+  "Idle_Sword",
+  "Sword_Slash",
 ]);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === "object";
@@ -46,7 +48,7 @@ export const validRound = (round: unknown): round is string =>
 
 export function validCombatCommand(value: unknown): value is CombatCommand {
   if (!isRecord(value) || !validRound(value.round)) return false;
-  if (value.kind === "reload") return true;
+  if (value.kind === "reload" || value.kind === "slash") return true;
   const d = value.direction;
   return (
     value.kind === "fire" &&

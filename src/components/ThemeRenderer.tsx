@@ -1,3 +1,4 @@
+import HuntTerrain from "./HuntTerrain";
 import VillageTerrain from "./VillageTerrain";
 import { Sky } from "@react-three/drei";
 import DesertLandscape from "./DesertLandscape";
@@ -240,14 +241,49 @@ export function UniverseTerrain() {
 
 export default function ThemeRenderer({ theme }: { theme: string }) {
   switch (theme) {
+    case "hunt":
+      return (
+        <>
+          <fog attach="fog" args={["#a9bda4", 55, 205]} />
+          <hemisphereLight args={["#f0f4d9", "#475634", 1.8]} />
+          <directionalLight
+            position={[-85, 135, 45]}
+            color="#fff1ca"
+            intensity={2.1}
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-235}
+            shadow-camera-right={235}
+            shadow-camera-top={235}
+            shadow-camera-bottom={-235}
+            shadow-camera-far={550}
+            shadow-normalBias={0.06}
+          />
+          <HuntTerrain />
+        </>
+      );
     case "village":
-      return <>
-        <fog attach="fog" args={["#c8dacf",160,320]} />
-        <ambientLight intensity={0.85} />
-        <hemisphereLight args={["#e1f0ff","#829046",1.1]} />
-        <directionalLight position={[-25,40,20]} intensity={2.5} color="#fff0cd" castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-90} shadow-camera-right={90} shadow-camera-top={90} shadow-camera-bottom={-90} shadow-camera-far={200} shadow-normalBias={0.035} />
-        <VillageTerrain />
-      </>;
+      return (
+        <>
+          <fog attach="fog" args={["#c8dacf", 160, 320]} />
+          <ambientLight intensity={0.85} />
+          <hemisphereLight args={["#e1f0ff", "#829046", 1.1]} />
+          <directionalLight
+            position={[-25, 40, 20]}
+            intensity={2.5}
+            color="#fff0cd"
+            castShadow
+            shadow-mapSize={[2048, 2048]}
+            shadow-camera-left={-90}
+            shadow-camera-right={90}
+            shadow-camera-top={90}
+            shadow-camera-bottom={-90}
+            shadow-camera-far={200}
+            shadow-normalBias={0.035}
+          />
+          <VillageTerrain />
+        </>
+      );
     case "woodland":
       return (
         <>

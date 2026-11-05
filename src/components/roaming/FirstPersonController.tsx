@@ -1,3 +1,4 @@
+import { Raycaster, Vector3 } from "three";
 import { CollisionContext } from "../../lib/collisionContext";
 import { worldBounds } from "../../lib/wandering";
 import { useContext, useEffect, useLayoutEffect, useRef } from "react";
@@ -32,16 +33,20 @@ export default function FirstPersonController({
   sharedSlot,
   roundKey,
   movementDisabled,
+  thirdPerson,
   onPose,
 }: {
   theme?: WorldTheme;
   sharedSlot?: number;
   roundKey?: string;
   movementDisabled?: boolean;
+  thirdPerson?: boolean;
   onPose?: (pose: PlayerPose) => void;
 }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, scene } = useThree();
   const collisions = useContext(CollisionContext);
+  const feet = useRef(new Vector3());
+  const cameraRay = useRef(new Raycaster());
   const keys = useRef(new Set<string>());
   const yaw = useRef(0),
     pitch = useRef(0);
@@ -57,6 +62,7 @@ export default function FirstPersonController({
       getTerrainHeight(start.x, z, theme) + EYE_HEIGHT,
       z,
     );
+    feet.current.copy(camera.position);
     yaw.current = start.yaw;
     pitch.current = 0;
     keys.current.clear();
@@ -175,36 +181,53 @@ export default function FirstPersonController({
     const [x, z] = active
       ? walkingStep(yaw.current, keys.current, delta)
       : [0, 0];
-    const from = camera.position;
+    const from = feet.current;
     const desired = { x: from.x + x, z: from.z + z };
     const next =
       (x || z) && collisions
         ? collisions.move(from, desired, from.y - EYE_HEIGHT, 0.28)
         : desired;
     const moved = next.x !== from.x || next.z !== from.z;
-    camera.position.x = next.x;
-    camera.position.z = next.z;
-    if (sharedSlot !== undefined) {
+    from.x = next.x;
+    from.z = next.z;
+    if (sharedSlot !== undefined || theme === "hunt") {
       const bounds = worldBounds(theme);
-      camera.position.x = Math.max(
-        bounds.minX,
-        Math.min(bounds.maxX, camera.position.x),
-      );
-      camera.position.z = Math.max(
-        bounds.minZ,
-        Math.min(bounds.maxZ, camera.position.z),
-      );
+      from.x = Math.max(bounds.minX, Math.min(bounds.maxX, from.x));
+      from.z = Math.max(bounds.minZ, Math.min(bounds.maxZ, from.z));
     }
-    const ground = getTerrainHeight(
-      camera.position.x,
-      camera.position.z,
-      theme,
-    );
-    camera.position.y = ground + EYE_HEIGHT;
+    const ground = getTerrainHeight(from.x, from.z, theme);
+    from.y = ground + EYE_HEIGHT;
+    if (thirdPerson) {
+      const focus = new Vector3(from.x, ground + 1.2, from.z);
+      const offset = new Vector3(0, 0.8, 4.6).applyAxisAngle(
+        new Vector3(0, 1, 0),
+        yaw.current,
+      );
+      offset.y += Math.max(-0.5, Math.min(3, -pitch.current * 2.8));
+      const distance = offset.length();
+      const ray = cameraRay.current;
+      ray.set(focus, offset.normalize());
+      ray.far = distance;
+      const blockers = [...(collisions?.obstacles.keys() ?? [])].filter(
+        (object): object is import("three").Object3D => "isObject3D" in object,
+      );
+      const terrain = scene.getObjectByName("terrain");
+      if (terrain) blockers.push(terrain);
+      const wall = ray.intersectObjects(blockers, true)[0];
+      camera.position
+        .copy(focus)
+        .addScaledVector(
+          offset,
+          wall ? Math.max(0.3, wall.distance - 0.2) : distance,
+        );
+      camera.lookAt(focus);
+    } else {
+      camera.position.copy(from);
+    }
     onPose?.({
-      x: camera.position.x,
+      x: from.x,
       y: ground,
-      z: camera.position.z,
+      z: from.z,
       yaw: yaw.current,
       motion: moved
         ? keys.current.has("ShiftLeft") || keys.current.has("ShiftRight")

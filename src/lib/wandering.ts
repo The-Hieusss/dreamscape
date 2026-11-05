@@ -1,3 +1,4 @@
+import { HUNT_LIMIT } from "./huntTerrain.ts";
 import type { CollisionMap, Point } from "./collisions";
 
 export interface WorldBounds {
@@ -7,6 +8,13 @@ export interface WorldBounds {
   maxZ: number;
 }
 export function worldBounds(theme?: string): WorldBounds {
+  if (theme === "hunt")
+    return {
+      minX: -HUNT_LIMIT,
+      maxX: HUNT_LIMIT,
+      minZ: -HUNT_LIMIT,
+      maxZ: HUNT_LIMIT,
+    };
   // Keep residents inside the village fences, with room to turn.
   return theme === "village"
     ? { minX: -28, maxX: 70, minZ: -26, maxZ: 26 }

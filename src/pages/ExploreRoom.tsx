@@ -1,3 +1,8 @@
+import CameraViewToggle, {
+  type CameraView,
+} from "../components/roaming/CameraViewToggle";
+import Combatant from "../components/fps/Combatant";
+import { KNIGHT_MODEL, SWORD_SWING_MS } from "../components/roaming/playerView";
 import CoopRange from "../components/fps/CoopRange";
 import type { CoopTransport } from "../components/fps/CoopRange";
 import { validCombatCommand, validCombatSnapshot } from "../lib/coopCombat";
@@ -46,13 +51,21 @@ function RemoteAvatar({
   pose,
   motion,
   slot,
+  sword,
+  swings,
 }: {
   pose: RefObject<PlayerPose | null>;
   motion: PlayerPose["motion"] | "Death";
   slot: number;
+  sword: boolean;
+  swings: number;
 }) {
   const group = useRef<Group>(null);
   const initialized = useRef(false);
+  const swingUntil = useRef(0);
+  useEffect(() => {
+    swingUntil.current = swings > 0 ? performance.now() + SWORD_SWING_MS : 0;
+  }, [swings]);
   useFrame((_, dt) => {
     if (!pose.current || !group.current) return;
     const { x, y, z, yaw } = pose.current;
@@ -69,16 +82,40 @@ function RemoteAvatar({
   });
   return (
     <group ref={group}>
-      <AnimatedModel
-        path={
-          slot === 0
-            ? "/models/Characters/Knight.glb"
-            : "/models/Characters/Farmer.glb"
-        }
-        animation={`CharacterArmature|${motion}`}
-        speed={0}
-        stickToTerrain={false}
-      />
+      {sword ? (
+        <Combatant
+          id={-1}
+          fighter="knight"
+          position={[0, 0, 0]}
+          dead={motion === "Death"}
+          active={() => true}
+          damagePlayer={() => {}}
+          readAvatar={() => ({
+            x: 0,
+            y: 0,
+            z: 0,
+            yaw: 0,
+            armed: true,
+            clip:
+              performance.now() < swingUntil.current
+                ? "Sword_Slash"
+                : motion === "Idle"
+                  ? "Idle_Sword"
+                  : motion,
+          })}
+        />
+      ) : (
+        <AnimatedModel
+          path={
+            slot === 0
+              ? "/models/Characters/Knight.glb"
+              : "/models/Characters/Farmer.glb"
+          }
+          animation={`CharacterArmature|${motion}`}
+          speed={0}
+          stickToTerrain={false}
+        />
+      )}
       <Html position={[0, 2.2, 0]} center style={{ pointerEvents: "none" }}>
         <span className="whitespace-nowrap rounded bg-slate-950/85 px-2 py-1 text-xs text-white">
           {slot === 0 ? "Host" : "Guest"}
@@ -89,6 +126,7 @@ function RemoteAvatar({
 }
 
 function RoomScene({ room }: { room: Room }) {
+  const [explorationView, setExplorationView] = useState<CameraView>("third");
   const [status, setStatus] = useState("Connecting…");
   const [peerOnline, setPeerOnline] = useState(false);
   const [hasPose, setHasPose] = useState(false);
@@ -251,6 +289,7 @@ function RoomScene({ room }: { room: Room }) {
     };
   }, [room, transport]);
 
+  const villageMelee = world?.theme === "village";
   const currentCombat = combat?.round === round ? combat : null;
   const player = currentCombat?.players[room.slot];
   const teammate = currentCombat?.players[1 - room.slot];
@@ -269,12 +308,14 @@ function RoomScene({ room }: { room: Room }) {
     <main className="relative h-dvh w-screen overflow-hidden">
       <SceneManager
         roaming
+        combatMode={!!round}
+        explorationView={explorationView}
         sharedSlot={room.slot}
         roundKey={round ?? undefined}
         deathAvatar={
           player?.health === 0
-            ? room.slot === 0
-              ? "/models/Characters/Knight.glb"
+            ? villageMelee || room.slot === 0
+              ? KNIGHT_MODEL
               : "/models/Characters/Farmer.glb"
             : undefined
         }
@@ -311,10 +352,12 @@ function RoomScene({ room }: { room: Room }) {
                 : motion
             }
             slot={1 - room.slot}
+            sword={!!round && villageMelee}
+            swings={villageMelee ? (teammate?.shots ?? 0) : 0}
           />
         )}
       </SceneManager>
-      {round && player?.health !== 0 && (
+      {round && !villageMelee && player?.health !== 0 && (
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-white"
           aria-hidden="true"
@@ -331,6 +374,12 @@ function RoomScene({ room }: { room: Room }) {
           Click the scene and use WASD or arrows to walk. Press Esc to release
           the mouse.
         </p>
+        {!round && (
+          <CameraViewToggle
+            view={explorationView}
+            onChange={setExplorationView}
+          />
+        )}
         {round && (
           <div className="space-y-1 border-t border-white/20 pt-2">
             <h2 className="font-semibold">Co-op combat</h2>
@@ -351,14 +400,21 @@ function RoomScene({ room }: { room: Room }) {
             )}
             {player && (
               <p>
-                {player.reloading ? "Reloading…" : `Ammo ${player.ammo} / 30`} ·
+                {!villageMelee &&
+                  (player.reloading
+                    ? "Reloading… · "
+                    : `Ammo ${player.ammo} / 30 · `)}
                 Hits {player.hits} / {player.shots}
               </p>
             )}
             {player?.health === 0 && teammate && teammate.health > 0 ? (
               <p>You’re down. Your teammate can finish the round.</p>
             ) : (
-              <p>Left click to fire · R to reload</p>
+              <p>
+                {villageMelee
+                  ? "Left click to swing your sword. Get close to land a hit."
+                  : "Left click to fire · R to reload"}
+              </p>
             )}
           </div>
         )}

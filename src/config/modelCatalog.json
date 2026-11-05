@@ -1630,5 +1630,11 @@
     "category": "Weapons",
     "name": "Pistol",
     "thumbnail": "/model-thumbnails/4622ab2909aa0f4e88b7.webp"
+  },
+  {
+    "path": "/models/Weapons/Sword.glb",
+    "category": "Weapons",
+    "name": "Sword",
+    "thumbnail": "/model-thumbnails/eca13ae89d844d32ccc6.webp"
   }
 ]

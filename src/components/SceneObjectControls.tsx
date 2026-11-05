@@ -1,3 +1,4 @@
+import { Layers3, MousePointer2, Trash2, Undo2 } from "lucide-react";
 import { rotationDegrees, setRotationAxis } from "../lib/objectRotation";
 import type { RotationTool } from "../lib/objectRotation";
 import { useState } from "react";
@@ -54,20 +55,24 @@ export default function SceneObjectControls({
   return (
     <section
       aria-label="Scene objects"
-      className="absolute right-3 top-3 z-20 w-64 max-w-[calc(100vw-1.5rem)] max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-3 rounded-2xl border border-white/15 bg-slate-950/90 p-4 text-white shadow-lg backdrop-blur"
+      className="absolute bottom-24 right-3 z-20 max-h-[45dvh] w-72 max-w-[calc(100vw-1.5rem)] space-y-3 overflow-y-auto rounded-2xl border border-violet-200/20 bg-gradient-to-br from-[#252045]/95 to-[#111528]/95 p-4 text-white shadow-xl shadow-indigo-950/35 backdrop-blur-xl lg:bottom-auto lg:top-3 lg:max-h-[calc(100dvh-7rem)]"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Scene objects</h2>
-        <span className="text-xs text-white/50">
+        <h2 className="flex items-center gap-2 text-sm font-semibold">
+          <Layers3 aria-hidden="true" size={17} className="text-violet-300" />{" "}
+          Scene objects
+        </h2>
+        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-200">
           {visible.length} {visible.length === 1 ? "object" : "objects"}
         </span>
       </div>
       <label className="block space-y-1 text-xs">
         Select an object
         <select
+          disabled={!visible.length}
           value={selected?.editorId ?? ""}
           onChange={(event) => onSelect(event.target.value || null)}
-          className="w-full rounded-lg border border-white/20 bg-slate-900 px-2 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full rounded-lg border border-white/15 bg-[#16182d] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="">
             {visible.length ? "Choose an object…" : "No objects yet"}
@@ -79,9 +84,18 @@ export default function SceneObjectControls({
           ))}
         </select>
       </label>
-      <p className="text-xs text-white/60">
-        Or click a model in the scene to select it.
-      </p>
+      {!selected && (
+        <p className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-relaxed text-slate-200">
+          <MousePointer2
+            aria-hidden="true"
+            size={15}
+            className="mt-0.5 shrink-0 text-violet-300"
+          />
+          {visible.length
+            ? "Choose an object above or click one in the scene to edit it."
+            : "Add a model from the library to start editing."}
+        </p>
+      )}
       {selected && (
         <fieldset className="space-y-3 border-t border-white/15 pt-3">
           <legend className="text-sm font-medium">Object properties</legend>
@@ -97,7 +111,7 @@ export default function SceneObjectControls({
                 <select
                   value={moveStep}
                   onChange={(event) => setMoveStep(Number(event.target.value))}
-                  className="w-full rounded-lg border border-white/20 bg-slate-900 px-2 py-2 text-sm text-white"
+                  className="w-full rounded-lg border border-white/15 bg-[#16182d] px-3 py-2 text-sm text-white"
                 >
                   <option value={0.25}>Fine · 0.25 units</option>
                   <option value={1}>Normal · 1 unit</option>
@@ -256,7 +270,7 @@ export default function SceneObjectControls({
                     speed: animationSpeed(event.target.value),
                   })
                 }
-                className="w-full rounded-lg border border-white/20 bg-slate-900 px-2 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-lg border border-white/15 bg-[#16182d] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 <option value="">
                   {clips.length ? "None (static)" : "No animations available"}
@@ -282,7 +296,7 @@ export default function SceneObjectControls({
                 if (Number.isFinite(size) && size >= 0.1 && size <= 10)
                   onUpdate({ size });
               }}
-              className="w-full rounded-lg border border-white/20 bg-slate-900 px-2 py-2 text-sm text-white"
+              className="w-full rounded-lg border border-white/15 bg-[#16182d] px-3 py-2 text-sm text-white"
             />
           </label>
           {!!animationSpeed(selected.animation ?? "") && (
@@ -316,22 +330,23 @@ export default function SceneObjectControls({
           </p>
         </fieldset>
       )}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={!selected}
-          onClick={onRemove}
-          className="flex-1 rounded-lg bg-red-500/90 px-3 py-2 text-sm font-medium hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Remove selected
-        </button>
+      <div className="flex gap-2 empty:hidden">
+        {selected && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-rose-300/25 bg-rose-400/10 px-3 py-2 text-sm font-medium text-rose-100 hover:bg-rose-400/25"
+          >
+            <Trash2 aria-hidden="true" size={15} /> Remove selected
+          </button>
+        )}
         {canUndo && (
           <button
             type="button"
             onClick={onUndo}
-            className="rounded-lg border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm hover:bg-white/10"
           >
-            Undo
+            <Undo2 aria-hidden="true" size={15} /> Undo
           </button>
         )}
       </div>

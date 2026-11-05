@@ -3,6 +3,7 @@ import { woodlandPathCenter } from "./woodlandTerrain.ts";
 
 export const EYE_HEIGHT = 1.75;
 export function roamStart(theme?: string) {
+  if (theme === "hunt") return { x: 14, z: 170, yaw: 0 };
   if (theme === "woodland") {
     const x = woodlandPathCenter(14),
       z = 14;

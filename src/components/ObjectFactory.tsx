@@ -103,7 +103,7 @@ export function ObjectFactory({
       <group ref={rootRef} position={pos} rotation={rot}>
         <Model
           path={obj.modelPath}
-          foliage={theme === "woodland"}
+          foliage={theme === "woodland" || theme === "hunt"}
           scale={[size, size, size]}
           centerOnGround={!swimming}
         />

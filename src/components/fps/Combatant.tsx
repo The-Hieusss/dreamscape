@@ -1,3 +1,4 @@
+import { KNIGHT_MODEL, PlayerView } from "../roaming/playerView";
 import type { EnemyPose, Slot } from "../../lib/coopCombat";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -10,8 +11,16 @@ import { getTerrainHeight } from "../../lib/terrain";
 import type { WorldTheme } from "../../lib/types";
 import { worldBounds } from "../../lib/wandering";
 
-export type Fighter = "soldier" | "swat";
+export type Fighter = "soldier" | "swat" | "knight";
 const fighters = {
+  knight: {
+    model: KNIGHT_MODEL,
+    weapon: "/models/Weapons/Sword.glb",
+    scale: 0.36,
+    range: 0,
+    damage: 18,
+    interval: 1.5,
+  },
   soldier: {
     model: "/models/Characters/Soldier.glb",
     weapon: "/models/Weapons/Pistol.glb",
@@ -63,6 +72,7 @@ export default function Combatant({
   choosePlayer,
   reportPose,
   replica,
+  readAvatar,
 }: {
   id: number;
   fighter: Fighter;
@@ -76,8 +86,11 @@ export default function Combatant({
   ) => { slot: Slot; eye: THREE.Vector3 } | undefined;
   reportPose?: (pose: EnemyPose) => void;
   replica?: EnemyPose;
+  readAvatar?: () => EnemyPose | undefined;
 }) {
   const config = fighters[fighter];
+  const knight = fighter === "knight";
+  const playerView = useContext(PlayerView);
   const { camera, scene } = useThree();
   const collisions = useContext(CollisionContext);
   const character = useGLTF(config.model);
@@ -105,7 +118,7 @@ export default function Combatant({
     if (hand) {
       const sample = new THREE.AnimationMixer(model);
       const aim = character.animations.find((clip) =>
-        clip.name.endsWith("|Idle_Gun_Pointing"),
+        clip.name.endsWith(knight ? "|Idle_Sword" : "|Idle_Gun_Pointing"),
       );
       if (aim) {
         sample.clipAction(aim).play();
@@ -113,14 +126,15 @@ export default function Combatant({
       }
       model.updateMatrixWorld(true);
       hand.getWorldPosition(gun.position);
-      gun.position.add(new THREE.Vector3(0, 0.04, 0.11));
-      gun.rotation.y = -Math.PI / 2;
+      gun.position.add(new THREE.Vector3(0, 0.04, knight ? 0.09 : 0.11));
+      if (knight) gun.rotation.x = Math.PI / 3;
+      else gun.rotation.y = -Math.PI / 2;
       gun.scale.setScalar(config.scale);
       hand.attach(gun);
       sample.stopAllAction();
     }
     return { model, gun, muzzle };
-  }, [character, weapon, config.scale]);
+  }, [character, weapon, config.scale, knight]);
 
   const { actions, mixer } = useAnimations(character.animations, model);
   const vectors = useMemo(
@@ -175,22 +189,27 @@ export default function Combatant({
 
   useFrame((_, delta) => {
     if (!body.current) return;
-    if (replica) {
-      const weight = 1 - Math.exp(-18 * delta);
+    const mirrored = replica ?? readAvatar?.();
+    if (mirrored) {
+      const weight = readAvatar ? 1 : 1 - Math.exp(-18 * delta);
       const { position, rotation } = body.current;
-      position.x = THREE.MathUtils.lerp(position.x, replica.x, weight);
-      position.y = THREE.MathUtils.lerp(position.y, replica.y, weight);
-      position.z = THREE.MathUtils.lerp(position.z, replica.z, weight);
-      const difference = replica.yaw - rotation.y;
+      position.x = THREE.MathUtils.lerp(position.x, mirrored.x, weight);
+      position.y = THREE.MathUtils.lerp(position.y, mirrored.y, weight);
+      position.z = THREE.MathUtils.lerp(position.z, mirrored.z, weight);
+      const difference = mirrored.yaw - rotation.y;
       rotation.y +=
         Math.atan2(Math.sin(difference), Math.cos(difference)) * weight;
       if (!dead) {
-        gun.visible = replica.armed;
+        gun.visible = mirrored.armed;
         mixer.timeScale = active() ? 1 : 0;
-        play(replica.clip || "Idle", /Shoot|Kick|Punch/.test(replica.clip));
+        play(
+          mirrored.clip || "Idle",
+          /Shoot|Kick|Punch|Slash/.test(mirrored.clip),
+        );
       }
       return;
     }
+    if (readAvatar) return;
     const { x, y, z } = body.current.position;
     reportPose?.({
       x,
@@ -211,7 +230,12 @@ export default function Combatant({
     const from = body.current.position;
     const selected = choosePlayer?.(from);
     if (choosePlayer && !selected) return;
-    const player = selected?.eye ?? camera.position;
+    const pose = knight ? playerView?.pose : null;
+    const player =
+      selected?.eye ??
+      (pose
+        ? new THREE.Vector3(pose.x, pose.y + 1.75, pose.z)
+        : camera.position);
     const dx = player.x - from.x,
       dz = player.z - from.z;
     const distance = Math.hypot(dx, dz);
@@ -259,7 +283,8 @@ export default function Combatant({
     }
 
     const melee =
-      distance <= MELEE_REACH && Math.abs(player.y - from.y - 1.75) < 1.1;
+      distance <= (knight ? 2 : MELEE_REACH) &&
+      Math.abs(player.y - from.y - 1.75) < 1.1;
     // Stagger line-of-sight queries and route searches across opponents.
     if (replan.current > 0 && !melee) {
       walk(dt);
@@ -268,13 +293,15 @@ export default function Combatant({
     replan.current = 0.32;
     if ((melee || distance <= config.range) && canSee(eye, aim)) {
       route.current = [];
-      gun.visible = !melee;
+      gun.visible = knight || !melee;
       if (cooldown.current <= 0) {
-        const name = melee
-          ? id % 2
-            ? "Kick_Right"
-            : "Punch_Right"
-          : "Idle_Gun_Shoot";
+        const name = knight
+          ? "Sword_Slash"
+          : melee
+            ? id % 2
+              ? "Kick_Right"
+              : "Punch_Right"
+            : "Idle_Gun_Shoot";
         play(name, true);
         const duration =
           actions[`CharacterArmature|${name}`]?.getClip().duration ?? 0.6;
@@ -287,7 +314,7 @@ export default function Combatant({
         };
         cooldown.current = Math.max(config.interval, duration);
       } else {
-        play(melee ? "Idle" : "Idle_Gun_Pointing");
+        play(knight ? "Idle_Sword" : melee ? "Idle" : "Idle_Gun_Pointing");
       }
     } else {
       const bounds = worldBounds(theme);
@@ -336,7 +363,7 @@ export default function Combatant({
     <>
       <group ref={body} position={spawn.current}>
         <primitive object={model} />
-        {!dead && (
+        {!dead && !readAvatar && (
           <mesh
             position={[0, 0.9, 0]}
             visible={false}

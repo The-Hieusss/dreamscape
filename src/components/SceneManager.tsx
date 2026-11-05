@@ -1,3 +1,7 @@
+import type { CameraView } from "./roaming/CameraViewToggle";
+import AnimatedModel from "./AnimatedModel";
+import Combatant from "./fps/Combatant";
+import { PlayerView } from "./roaming/playerView";
 import DeathView from "./fps/DeathView";
 import { CollisionContext } from "../lib/collisionContext";
 import { CollisionMap } from "../lib/collisions";
@@ -15,18 +19,58 @@ import type { RefObject } from "react";
 type MovementRef = RefObject<
   ((direction: MoveDirection, distance: number) => void) | null
 >;
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
   ContactShadows,
 } from "@react-three/drei";
-import { Suspense, useEffect, useState, useCallback } from "react";
+import {
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import type { SceneObject, World } from "../lib/types";
 import SelectableObject from "./SelectableObject";
 import * as THREE from "three";
 import ThemeRenderer from "./ThemeRenderer";
+
+function ExplorerAvatar({
+  slot,
+  village,
+}: {
+  slot?: number;
+  village: boolean;
+}) {
+  const view = useContext(PlayerView);
+  const group = useRef<THREE.Group>(null);
+  const [motion, setMotion] = useState<PlayerPose["motion"]>("Idle");
+  useFrame(() => {
+    const pose = view?.pose;
+    if (!group.current || !pose) return;
+    group.current.position.set(pose.x, pose.y, pose.z);
+    group.current.rotation.y = pose.yaw + Math.PI;
+    if (motion !== pose.motion) setMotion(pose.motion);
+  });
+  return (
+    <group ref={group}>
+      <AnimatedModel
+        path={
+          slot === 0 || (slot === undefined && village)
+            ? "/models/Characters/Knight.glb"
+            : "/models/Characters/Farmer.glb"
+        }
+        animation={`CharacterArmature|${motion}`}
+        speed={0}
+        stickToTerrain={false}
+      />
+    </group>
+  );
+}
 
 // Inner scene (hooks live here)
 function SceneContent({
@@ -40,6 +84,8 @@ function SceneContent({
   rotationTool,
   onRotate,
   roaming,
+  combatMode,
+  explorationView = "third",
   sharedSlot,
   roundKey,
   deathAvatar,
@@ -47,6 +93,8 @@ function SceneContent({
   children,
 }: {
   roaming: boolean;
+  combatMode?: boolean;
+  explorationView?: CameraView;
   sharedSlot?: number;
   roundKey?: string;
   deathAvatar?: string;
@@ -63,6 +111,9 @@ function SceneContent({
   onRotate: (id: string, rotation: Rotation) => void;
 }) {
   const { gl, camera, scene, size } = useThree();
+  const playerView = useContext(PlayerView);
+  const swordCombat = combatMode && world?.theme === "village";
+  const thirdPerson = combatMode ? swordCombat : explorationView === "third";
   const [raycaster] = useState(() => new THREE.Raycaster());
   const pointer = new THREE.Vector2();
 
@@ -241,7 +292,11 @@ function SceneContent({
             sharedSlot={sharedSlot}
             roundKey={roundKey}
             movementDisabled={!!deathAvatar}
-            onPose={onPose}
+            thirdPerson={thirdPerson}
+            onPose={(pose) => {
+              if (playerView) playerView.pose = pose;
+              onPose?.(pose);
+            }}
           />
         </>
       )}
@@ -291,6 +346,38 @@ function SceneContent({
               }
             />
           ))}
+        {roaming && !combatMode && thirdPerson && (
+          <ExplorerAvatar
+            slot={sharedSlot}
+            village={world?.theme === "village"}
+          />
+        )}
+        {roaming && swordCombat && !deathAvatar && (
+          <Combatant
+            id={-1}
+            fighter="knight"
+            position={[0, 0, 0]}
+            dead={false}
+            active={() => true}
+            damagePlayer={() => {}}
+            readAvatar={() => {
+              const pose = playerView?.pose;
+              return pose
+                ? {
+                    ...pose,
+                    yaw: pose.yaw + Math.PI,
+                    armed: true,
+                    clip:
+                      performance.now() < playerView!.swingUntil
+                        ? "Sword_Slash"
+                        : pose.motion === "Idle"
+                          ? "Idle_Sword"
+                          : pose.motion,
+                  }
+                : undefined;
+            }}
+          />
+        )}
         {roaming && deathAvatar && <DeathView avatar={deathAvatar} />}
         {children}
       </Suspense>
@@ -319,6 +406,8 @@ function SceneContent({
 
 export default function SceneManager(props: {
   roaming: boolean;
+  combatMode?: boolean;
+  explorationView?: CameraView;
   sharedSlot?: number;
   roundKey?: string;
   deathAvatar?: string;
@@ -335,6 +424,7 @@ export default function SceneManager(props: {
   onRotate: (id: string, rotation: Rotation) => void;
 }) {
   const [collisions] = useState(() => new CollisionMap());
+  const [playerView] = useState(() => ({ pose: null, swingUntil: 0 }));
   return (
     <Canvas
       shadows
@@ -344,7 +434,9 @@ export default function SceneManager(props: {
       }}
     >
       <CollisionContext.Provider value={collisions}>
-        <SceneContent {...props} />
+        <PlayerView.Provider value={playerView}>
+          <SceneContent {...props} />
+        </PlayerView.Provider>
       </CollisionContext.Provider>
     </Canvas>
   );

@@ -1,3 +1,17 @@
+import { huntWorld } from "../lib/huntTerrain";
+import CameraViewToggle, {
+  type CameraView,
+} from "../components/roaming/CameraViewToggle";
+import { KNIGHT_MODEL } from "../components/roaming/playerView";
+import {
+  ChevronDown,
+  Crosshair,
+  Footprints,
+  FolderOpen,
+  Globe2,
+  Save,
+  Users,
+} from "lucide-react";
 import PracticeRange, {
   initialRangeStats,
 } from "../components/fps/PracticeRange";
@@ -127,7 +141,9 @@ function WorldEditor({
     snap: false,
   });
   const [roaming, setRoaming] = useState(false);
+  const [explorationView, setExplorationView] = useState<CameraView>("third");
   const [practice, setPractice] = useState(false);
+  const [hunting, setHunting] = useState(false);
   const [targetMode, setTargetMode] = useState<"balls" | "characters">("balls");
   const [rangeRound, setRangeRound] = useState(0);
   const [rangeStats, setRangeStats] = useState(initialRangeStats);
@@ -483,18 +499,28 @@ function WorldEditor({
       </main>
     );
 
+  const villageMelee = !hunting && world?.theme === "village";
+
   return (
     <div className="relative w-screen h-screen md:h-screen overflow-hidden">
       <SceneManager
         roaming={roaming}
-        roundKey={practice ? `${targetMode}:${rangeRound}` : undefined}
-        deathAvatar={
-          practice && !rangeStats.health
-            ? "/models/Characters/Soldier.glb"
+        combatMode={practice}
+        explorationView={explorationView}
+        roundKey={
+          practice
+            ? `${hunting ? "hunt" : targetMode}:${rangeRound}`
             : undefined
         }
-        objects={objects}
-        world={world}
+        deathAvatar={
+          practice && !rangeStats.health
+            ? villageMelee
+              ? KNIGHT_MODEL
+              : "/models/Characters/Soldier.glb"
+            : undefined
+        }
+        objects={hunting ? huntWorld.objects : objects}
+        world={hunting ? huntWorld : world}
         onAddObject={addObject}
         selectedId={selectedId}
         onSelect={setSelectedId}
@@ -505,10 +531,10 @@ function WorldEditor({
       >
         {practice && (
           <PracticeRange
-            key={`${targetMode}:${rangeRound}`}
+            key={`${hunting ? "hunt" : targetMode}:${rangeRound}`}
             targetMode={targetMode}
             defeated={!rangeStats.health}
-            theme={world?.theme}
+            theme={hunting ? "hunt" : world?.theme}
             onStats={setRangeStats}
             onHit={markHit}
           />
@@ -516,7 +542,7 @@ function WorldEditor({
       </SceneManager>
       {practice && (
         <>
-          {!!rangeStats.health && (
+          {!villageMelee && !!rangeStats.health && (
             <div
               aria-hidden="true"
               className={`pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 text-2xl leading-none ${hitMarker ? "text-amber-400" : "text-white"}`}
@@ -532,38 +558,53 @@ function WorldEditor({
               {!rangeStats.health
                 ? "You were defeated"
                 : rangeStats.targets
-                  ? "Target practice"
-                  : "Range clear"}
+                  ? villageMelee
+                    ? "Sword combat"
+                    : hunting
+                      ? "T. rex hunt"
+                      : "Target practice"
+                  : hunting
+                    ? "Hunt complete"
+                    : "Range clear"}
             </p>
             <p>
-              {rangeStats.reloading
-                ? "Reloading…"
-                : `Ammo ${rangeStats.ammo} / 30`}{" "}
-              · Targets left {rangeStats.targets}
+              {!villageMelee &&
+                (rangeStats.reloading
+                  ? "Reloading… · "
+                  : `Ammo ${rangeStats.ammo} / 30 · `)}
+              {hunting
+                ? "T. rexes left"
+                : villageMelee
+                  ? "Knights left"
+                  : "Targets left"}{" "}
+              {rangeStats.targets}
             </p>
-            {targetMode === "characters" && (
+            {(hunting || villageMelee || targetMode === "characters") && (
               <p>Health {rangeStats.health} / 100</p>
             )}
-            <label className="flex items-center gap-2">
-              Targets
-              <select
-                value={targetMode}
-                className="rounded bg-slate-700 px-2 py-1"
-                onChange={(event) => {
-                  setRangeStats(initialRangeStats);
-                  setTargetMode(
-                    event.target.value === "characters"
-                      ? "characters"
-                      : "balls",
-                  );
-                }}
-              >
-                <option value="balls">Balls</option>
-                <option value="characters">Soldiers and SWAT</option>
-              </select>
-            </label>
+            {!villageMelee && !hunting && (
+              <label className="flex items-center gap-2">
+                Targets
+                <select
+                  value={targetMode}
+                  className="rounded bg-slate-700 px-2 py-1"
+                  onChange={(event) => {
+                    setRangeStats(initialRangeStats);
+                    setTargetMode(
+                      event.target.value === "characters"
+                        ? "characters"
+                        : "balls",
+                    );
+                  }}
+                >
+                  <option value="balls">Balls</option>
+                  <option value="characters">Soldiers and SWAT</option>
+                </select>
+              </label>
+            )}
             <p>
-              Hits {rangeStats.hits} / {rangeStats.shots} shots
+              Hits {rangeStats.hits} / {rangeStats.shots}{" "}
+              {villageMelee ? "swings" : "shots"}
             </p>
             <button
               type="button"
@@ -689,23 +730,25 @@ function WorldEditor({
           </button>
         </form>
       )}
-      <div className="absolute left-1/2 top-3 z-30 -translate-x-1/2 max-w-[calc(100vw-1.5rem)] rounded-xl border border-white/20 bg-slate-950/85 p-2 text-white shadow-lg backdrop-blur">
+      <div className="absolute left-1/2 top-3 z-30 -translate-x-1/2 max-w-[calc(100vw-1.5rem)] w-max rounded-2xl border border-violet-200/20 bg-gradient-to-br from-[#252045]/95 to-[#111528]/95 p-2.5 text-white shadow-xl shadow-indigo-950/35 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => {
             setSelectedId(null);
             setRotationTool((tool) => ({ ...tool, enabled: false }));
             setPractice(false);
+            setHunting(false);
             setRoaming((value) => !value);
           }}
-          className="whitespace-nowrap rounded-lg bg-indigo-500 px-3 py-2 text-sm font-medium hover:bg-indigo-400"
+          className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold hover:bg-indigo-500"
         >
+          <Footprints aria-hidden="true" size={16} />{" "}
           {roaming ? "Back to build" : "Explore on foot"}
         </button>
         {!roaming && (
           <button
             type="button"
-            className="ml-2 rounded-lg bg-slate-700 px-3 py-2 text-sm hover:bg-slate-600"
+            className="ml-2 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm hover:bg-white/15"
             onClick={() => {
               setSelectedId(null);
               setRotationTool((tool) => ({ ...tool, enabled: false }));
@@ -714,17 +757,41 @@ function WorldEditor({
               setRoaming(true);
             }}
           >
-            Target practice
+            <Crosshair aria-hidden="true" size={16} />{" "}
+            {villageMelee ? "Sword combat" : "Target practice"}
           </button>
         )}
         {!roaming && (
-          <details className="mt-2 text-sm">
-            <summary className="cursor-pointer">World</summary>
-            <div className="mt-2 flex max-w-64 flex-col gap-2">
+          <button
+            type="button"
+            className="ml-2 inline-flex items-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-3 py-2 text-sm hover:bg-emerald-400/20"
+            onClick={() => {
+              setSelectedId(null);
+              setRotationTool((tool) => ({ ...tool, enabled: false }));
+              setRangeStats({ ...initialRangeStats, targets: 3 });
+              setHunting(true);
+              setPractice(true);
+              setRoaming(true);
+            }}
+          >
+            T. rex hunt
+          </button>
+        )}
+        {!roaming && (
+          <details className="group mt-2 border-t border-white/10 text-sm">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 pt-2 font-semibold text-violet-100 [&::-webkit-details-marker]:hidden">
+              <Globe2 aria-hidden="true" size={16} /> World
+              <ChevronDown
+                aria-hidden="true"
+                size={15}
+                className="ml-auto transition-transform group-open:rotate-180"
+              />
+            </summary>
+            <div className="mt-3 flex w-full max-w-80 flex-col gap-2.5 px-1 pb-1">
               <label className="flex flex-col gap-1">
                 World name
                 <input
-                  className="rounded bg-slate-800 p-2"
+                  className="rounded-xl border border-white/15 bg-black/20 px-3 py-2 focus-visible:outline-2 focus-visible:outline-indigo-300"
                   maxLength={100}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -733,10 +800,11 @@ function WorldEditor({
               {signedIn ? (
                 <>
                   <button
-                    className="rounded bg-indigo-600 p-2"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 p-2.5 font-semibold hover:bg-indigo-500 disabled:opacity-45"
                     disabled={busy || loading || !name.trim() || staleDraft}
                     onClick={() => void persist(false)}
                   >
+                    <Save aria-hidden="true" size={16} />
                     {busy
                       ? "Saving…"
                       : recoveredCopy
@@ -744,11 +812,12 @@ function WorldEditor({
                         : "Save world"}
                   </button>
                   <button
-                    className="rounded bg-slate-700 p-2"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 p-2.5 hover:bg-white/15 disabled:opacity-45"
                     disabled={busy || loading || !name.trim() || staleDraft}
                     onClick={() => void persist(true)}
                   >
-                    Save and explore together
+                    <Users aria-hidden="true" size={16} /> Save and explore
+                    together
                   </button>
                 </>
               ) : (
@@ -760,9 +829,14 @@ function WorldEditor({
                   Sign in to save to your account
                 </Link>
               )}
-              <Link to="/my-worlds">My worlds</Link>
+              <Link
+                to="/my-worlds"
+                className="inline-flex items-center gap-2 self-start rounded-lg px-2 py-1 text-violet-100 hover:bg-white/10"
+              >
+                <FolderOpen aria-hidden="true" size={16} /> My worlds
+              </Link>
               {staleDraft && (
-                <div className="space-y-2">
+                <div className="space-y-2 rounded-xl border border-amber-300/25 bg-amber-300/10 p-3">
                   <p>A local draft is based on an older version.</p>
                   <button
                     onClick={() => {
@@ -785,8 +859,15 @@ function WorldEditor({
                   </button>
                 </div>
               )}
-              {saveError && <p role="alert">{saveError}</p>}
-              <p className="text-xs text-slate-300">
+              {saveError && (
+                <p
+                  role="alert"
+                  className="rounded-lg bg-rose-400/10 p-2 text-rose-200"
+                >
+                  {saveError}
+                </p>
+              )}
+              <p className="border-t border-white/10 pt-2 text-xs text-slate-300">
                 {draftError ||
                   (saved
                     ? `Cloud version ${saved.revision} · Local draft recovery`
@@ -795,12 +876,28 @@ function WorldEditor({
             </div>
           </details>
         )}
+        {roaming && !practice && (
+          <div className="mt-2">
+            <CameraViewToggle
+              view={explorationView}
+              onChange={setExplorationView}
+            />
+          </div>
+        )}
         {roaming && (
           <p className="mt-2 max-w-sm text-xs text-white/75">
+            {hunting && (
+              <span className="mb-1 block text-emerald-200">
+                Search the river valley and wooded ridges. A wounded T. rex
+                charges, and one bite ends the hunt.
+              </span>
+            )}
             Click the scene to start. WASD / arrows: walk · Shift: faster ·
             Mouse: look · Esc: pause.{" "}
             {practice
-              ? "Left click or hold to fire · R: reload."
+              ? villageMelee
+                ? "Left click to swing your sword. Get close and face a knight to hit."
+                : "Left click or hold to fire · R: reload."
               : "Drag to look if mouse lock is unavailable."}
           </p>
         )}

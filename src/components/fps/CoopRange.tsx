@@ -1,3 +1,5 @@
+import { PlayerView, SWORD_SWING_MS } from "../roaming/playerView";
+import { swordHit } from "./swordHit";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
@@ -53,6 +55,8 @@ export default function CoopRange({
   onState: (state: CombatSnapshot) => void;
 }) {
   const { gl, scene, camera } = useThree();
+  const melee = theme === "village";
+  const playerView = useContext(PlayerView);
   const collisions = useContext(CollisionContext);
   const [state, setState] = useState<CombatSnapshot | null>(null);
   const host = useRef<CombatSnapshot>({
@@ -169,7 +173,10 @@ export default function CoopRange({
         : previous && player.shots > previous.shots
           ? "Shoot"
           : null;
-    if (clip) setAction((value) => ({ clip, sequence: value.sequence + 1 }));
+    if (clip && !melee)
+      setAction((value) => ({ clip, sequence: value.sequence + 1 }));
+    if (melee && clip === "Shoot" && playerView)
+      playerView.swingUntil = performance.now() + SWORD_SWING_MS;
     lastRendered.current = snapshot;
     setState(snapshot);
     onState(snapshot);
@@ -188,16 +195,18 @@ export default function CoopRange({
         document.activeElement === gl.domElement)
     ) {
       let command: CombatCommand | undefined;
-      if (reloadPressed.current) command = { round, kind: "reload" };
+      if (!melee && reloadPressed.current) command = { round, kind: "reload" };
       else if ((held.current || pressed.current) && now >= nextInput.current) {
         camera.getWorldDirection(direction.current);
-        command = {
-          round,
-          kind: "fire",
-          direction: direction.current.toArray(),
-        };
+        command = melee
+          ? { round, kind: "slash" }
+          : {
+              round,
+              kind: "fire",
+              direction: direction.current.toArray(),
+            };
         pressed.current = false;
-        nextInput.current = now + 145;
+        nextInput.current = now + (melee ? SWORD_SWING_MS : 145);
       }
       reloadPressed.current = false;
       if (command) {
@@ -236,6 +245,8 @@ export default function CoopRange({
           player.reloading
         )
           continue;
+        if (melee ? command.kind !== "slash" : command.kind === "slash")
+          continue;
         if (command.kind === "reload") {
           if (player.ammo < 30) {
             player.reloading = true;
@@ -246,37 +257,36 @@ export default function CoopRange({
         const pose = transport.pose(index);
         if (
           !pose ||
-          !player.ammo ||
+          (!melee && !player.ammo) ||
           clock.current < nextShot.current[index] ||
           !targetGroup.current ||
           roundOver(snapshot)
         )
           continue;
-        nextShot.current[index] = clock.current + 0.13;
-        player.ammo--;
+        nextShot.current[index] =
+          clock.current + (melee ? SWORD_SWING_MS / 1000 : 0.13);
+        if (!melee) player.ammo--;
         player.shots++;
-        ray.current.far = 80;
-        ray.current.set(
-          origin.current.set(pose.x, pose.y + EYE_HEIGHT, pose.z),
-          direction.current.fromArray(command.direction).normalize(),
-        );
-        const hit = ray.current
-          .intersectObject(targetGroup.current, true)
-          .find((entry) =>
-            snapshot.enemies.some(
-              (enemy) =>
-                enemy.hp > 0 && enemy.id === entry.object.userData.rangeTarget,
-            ),
+        const blockers = shotBlockers(scene, collisions);
+        const alive = (id: number) =>
+          snapshot.enemies.some((enemy) => enemy.id === id && enemy.hp > 0);
+        let hitId: number | undefined;
+        if (command.kind === "slash") {
+          hitId = swordHit(pose, targetGroup.current, blockers, alive);
+        } else if (command.kind === "fire") {
+          ray.current.far = 80;
+          ray.current.set(
+            origin.current.set(pose.x, pose.y + EYE_HEIGHT, pose.z),
+            direction.current.fromArray(command.direction).normalize(),
           );
-        if (!hit) continue;
-        const wall = ray.current.intersectObjects(
-          shotBlockers(scene, collisions),
-          true,
-        )[0];
-        if (wall && wall.distance <= hit.distance) continue;
-        const enemy = snapshot.enemies.find(
-          (enemy) => enemy.id === hit.object.userData.rangeTarget,
-        );
+          const hit = ray.current
+            .intersectObject(targetGroup.current, true)
+            .find((entry) => alive(entry.object.userData.rangeTarget));
+          const wall = hit && ray.current.intersectObjects(blockers, true)[0];
+          if (hit && (!wall || hit.distance < wall.distance))
+            hitId = hit.object.userData.rangeTarget;
+        }
+        const enemy = snapshot.enemies.find((enemy) => enemy.id === hitId);
         if (enemy) {
           enemy.hp--;
           player.hits++;
@@ -317,7 +327,7 @@ export default function CoopRange({
           <Combatant
             key={enemy.id}
             id={enemy.id}
-            fighter={enemy.id % 2 ? "swat" : "soldier"}
+            fighter={melee ? "knight" : enemy.id % 2 ? "swat" : "soldier"}
             position={[enemy.pose.x, enemy.pose.y, enemy.pose.z]}
             dead={!enemy.hp}
             theme={theme}
@@ -349,7 +359,9 @@ export default function CoopRange({
           />
         ))}
       </group>
-      {state?.players[slot].health !== 0 && <ViewRig action={action} />}
+      {!melee && state?.players[slot].health !== 0 && (
+        <ViewRig action={action} />
+      )}
     </>
   );
 }

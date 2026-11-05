@@ -1,3 +1,4 @@
+import { PlayerView } from "../roaming/playerView";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useContext, useLayoutEffect, useRef } from "react";
 import { Group, Raycaster, Vector3 } from "three";
@@ -8,6 +9,7 @@ import { shotBlockers } from "./Combatant";
 
 export default function DeathView({ avatar }: { avatar: string }) {
   const { camera, scene } = useThree();
+  const playerView = useContext(PlayerView);
   const collisions = useContext(CollisionContext);
   const body = useRef<Group>(null);
   const view = useRef<{
@@ -24,7 +26,11 @@ export default function DeathView({ avatar }: { avatar: string }) {
     forward.y = 0;
     if (forward.lengthSq() < 0.001) forward.set(0, 0, -1);
     forward.normalize();
-    body.current.position.copy(start).y -= EYE_HEIGHT;
+    const pose = playerView?.pose;
+    if (pose) {
+      body.current.position.set(pose.x, pose.y, pose.z);
+      forward.set(-Math.sin(pose.yaw), 0, -Math.cos(pose.yaw));
+    } else body.current.position.copy(start).y -= EYE_HEIGHT;
     body.current.rotation.y = Math.atan2(forward.x, forward.z);
     const focus = body.current.position.clone().add(new Vector3(0, 0.7, 0));
     const offset = new Vector3(-forward.z, 0, forward.x)
@@ -41,7 +47,7 @@ export default function DeathView({ avatar }: { avatar: string }) {
         wall ? Math.max(0.3, wall.distance - 0.2) : distance,
       );
     view.current = { start, end, focus, elapsed: 0 };
-  }, [camera, scene, collisions]);
+  }, [camera, scene, collisions, playerView]);
 
   useFrame((_, delta) => {
     const transition = view.current;

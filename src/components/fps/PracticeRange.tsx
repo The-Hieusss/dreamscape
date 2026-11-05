@@ -1,3 +1,7 @@
+import HuntRex, { REX_HEALTH } from "./HuntRex";
+import { huntSpawns } from "../../lib/huntTerrain";
+import { PlayerView, SWORD_SWING_MS } from "../roaming/playerView";
+import { swordHit } from "./swordHit";
 import Combatant, { shotBlockers } from "./Combatant";
 import {
   Hud,
@@ -115,6 +119,10 @@ export default function PracticeRange({
   onHit: () => void;
 }) {
   const { gl, camera, scene } = useThree();
+  const playerView = useContext(PlayerView);
+  const hunt = theme === "hunt";
+  const melee = theme === "village";
+  const characters = melee || targetMode === "characters";
   const collisions = useContext(CollisionContext);
   const [targets, setTargets] = useState<Target[]>([]);
   const [action, setAction] = useState<{ clip: RigClip; sequence: number }>({
@@ -130,9 +138,9 @@ export default function PracticeRange({
   const nextShot = useRef(0);
   const raycaster = useMemo(() => {
     const ray = new THREE.Raycaster();
-    ray.far = 80;
+    ray.far = hunt ? 160 : 80;
     return ray;
-  }, []);
+  }, [hunt]);
   const center = useMemo(() => new THREE.Vector2(), []);
   const reloadDuration =
     useGLTF(RIG_PATH).animations.find((clip) => clip.name === "Armature|Reload")
@@ -140,9 +148,15 @@ export default function PracticeRange({
 
   useEffect(() => {
     const start = roamStart(theme);
-    const positions: Target[] = [];
-    const count = targetMode === "characters" ? 4 : TARGET_COUNT;
-    for (const distance of [9, 14, 20, 27]) {
+    const positions: Target[] = hunt
+      ? huntSpawns.map(({ x, z }, id) => ({
+          id,
+          position: [x, getTerrainHeight(x, z, theme), z],
+          hp: REX_HEALTH,
+        }))
+      : [];
+    const count = characters ? 4 : TARGET_COUNT;
+    for (const distance of hunt ? [] : [9, 14, 20, 27]) {
       for (const side of [-5, 0, 5, -9, 9]) {
         if (positions.length >= count) break;
         const x =
@@ -154,8 +168,8 @@ export default function PracticeRange({
           continue;
         positions.push({
           id: positions.length,
-          position: [x, ground + (targetMode === "balls" ? 1.45 : 0), z],
-          hp: targetMode === "characters" ? 3 : 2,
+          position: [x, ground + (characters ? 0 : 1.45), z],
+          hp: characters ? 3 : 2,
         });
       }
     }
@@ -163,7 +177,7 @@ export default function PracticeRange({
     stats.current = { ...initialRangeStats, targets: positions.length };
     setTargets(positions);
     onStats(stats.current);
-  }, [collisions, theme, targetMode, onStats]);
+  }, [collisions, theme, characters, hunt, onStats]);
 
   const active = useCallback(() => {
     const canvas = gl.domElement;
@@ -210,6 +224,7 @@ export default function PracticeRange({
     };
     const reload = (event: KeyboardEvent) => {
       if (
+        melee ||
         event.code !== "KeyR" ||
         event.repeat ||
         !active() ||
@@ -242,7 +257,7 @@ export default function PracticeRange({
       document.removeEventListener("pointerlockchange", cancel);
       document.removeEventListener("visibilitychange", cancel);
     };
-  }, [gl, active, onStats, reloadDuration]);
+  }, [gl, active, onStats, reloadDuration, melee]);
 
   useFrame(() => {
     const now = performance.now();
@@ -257,50 +272,56 @@ export default function PracticeRange({
     if (
       (!held.current && !queued.current) ||
       !current.targets ||
-      !current.ammo ||
+      (!melee && !current.ammo) ||
       now < nextShot.current ||
       !targetGroup.current
     )
       return;
     if (!active()) return;
     queued.current = false;
-    nextShot.current = now + FIRE_INTERVAL;
+    nextShot.current = now + (melee ? SWORD_SWING_MS : FIRE_INTERVAL);
+    if (melee && playerView) playerView.swingUntil = now + SWORD_SWING_MS;
     setAction((previous) => ({
       clip: "Shoot",
       sequence: previous.sequence + 1,
     }));
     const next = {
       ...current,
-      ammo: current.ammo - 1,
+      ammo: current.ammo - (melee ? 0 : 1),
       shots: current.shots + 1,
     };
 
-    camera.updateMatrixWorld();
-    raycaster.setFromCamera(center, camera);
-    const targetsHit = raycaster.intersectObject(targetGroup.current, true);
-    const hit = targetsHit.find(
-      ({ object }) => typeof object.userData.rangeTarget === "number",
-    );
-    if (hit) {
-      const wall = raycaster.intersectObjects(
-        shotBlockers(scene, collisions),
-        true,
-      )[0];
-      if (!wall || hit.distance < wall.distance) {
-        const id = hit.object.userData.rangeTarget;
-        const target = liveTargets.current.find((target) => target.id === id);
-        if (target && target.hp > 0) {
-          liveTargets.current = liveTargets.current.map((target) =>
-            target.id === id ? { ...target, hp: target.hp - 1 } : target,
-          );
-          next.hits++;
-          next.targets = liveTargets.current.filter(
-            (target) => target.hp > 0,
-          ).length;
-        }
-        setTargets(liveTargets.current);
-        onHit();
-      }
+    const blockers = shotBlockers(scene, collisions);
+    let hitId: number | undefined;
+    if (melee) {
+      if (playerView?.pose)
+        hitId = swordHit(playerView.pose, targetGroup.current, blockers, (id) =>
+          liveTargets.current.some(
+            (target) => target.id === id && target.hp > 0,
+          ),
+        );
+    } else {
+      camera.updateMatrixWorld();
+      raycaster.setFromCamera(center, camera);
+      const hit = raycaster
+        .intersectObject(targetGroup.current, true)
+        .find((entry) => typeof entry.object.userData.rangeTarget === "number");
+      const wall = hit && raycaster.intersectObjects(blockers, true)[0];
+      if (hit && (!wall || hit.distance < wall.distance))
+        hitId = hit.object.userData.rangeTarget;
+    }
+    if (
+      liveTargets.current.some((target) => target.id === hitId && target.hp > 0)
+    ) {
+      liveTargets.current = liveTargets.current.map((target) =>
+        target.id === hitId ? { ...target, hp: target.hp - 1 } : target,
+      );
+      next.hits++;
+      next.targets = liveTargets.current.filter(
+        (target) => target.hp > 0,
+      ).length;
+      setTargets(liveTargets.current);
+      onHit();
     }
     stats.current = next;
     onStats(next);
@@ -309,39 +330,52 @@ export default function PracticeRange({
   return (
     <>
       <group ref={targetGroup}>
-        {targetMode === "characters"
+        {hunt
           ? targets.map((target) => (
-              <Combatant
+              <HuntRex
                 key={target.id}
                 id={target.id}
-                fighter={target.id % 2 ? "swat" : "soldier"}
-                position={target.position}
-                dead={target.hp <= 0}
-                theme={theme}
+                spawn={target.position}
+                hp={target.hp}
                 active={active}
-                damagePlayer={damagePlayer}
+                onBite={() => damagePlayer(100)}
               />
             ))
-          : targets
-              .filter((target) => target.hp > 0)
-              .map((target) => (
-                <group key={target.id} position={target.position}>
-                  <mesh userData={{ rangeTarget: target.id }}>
-                    <sphereGeometry args={[0.47, 24, 16]} />
-                    <meshStandardMaterial
-                      color={target.hp === 2 ? "#ff763d" : "#ffe566"}
-                      emissive={target.hp === 2 ? "#8a1a00" : "#665100"}
-                      emissiveIntensity={0.5}
-                    />
-                  </mesh>
-                  <mesh position={[0, -0.88, 0]}>
-                    <cylinderGeometry args={[0.06, 0.09, 1.15, 8]} />
-                    <meshStandardMaterial color="#303744" />
-                  </mesh>
-                </group>
-              ))}
+          : characters
+            ? targets.map((target) => (
+                <Combatant
+                  key={target.id}
+                  id={target.id}
+                  fighter={
+                    melee ? "knight" : target.id % 2 ? "swat" : "soldier"
+                  }
+                  position={target.position}
+                  dead={target.hp <= 0}
+                  theme={theme}
+                  active={active}
+                  damagePlayer={damagePlayer}
+                />
+              ))
+            : targets
+                .filter((target) => target.hp > 0)
+                .map((target) => (
+                  <group key={target.id} position={target.position}>
+                    <mesh userData={{ rangeTarget: target.id }}>
+                      <sphereGeometry args={[0.47, 24, 16]} />
+                      <meshStandardMaterial
+                        color={target.hp === 2 ? "#ff763d" : "#ffe566"}
+                        emissive={target.hp === 2 ? "#8a1a00" : "#665100"}
+                        emissiveIntensity={0.5}
+                      />
+                    </mesh>
+                    <mesh position={[0, -0.88, 0]}>
+                      <cylinderGeometry args={[0.06, 0.09, 1.15, 8]} />
+                      <meshStandardMaterial color="#303744" />
+                    </mesh>
+                  </group>
+                ))}
       </group>
-      {!defeated && <ViewRig action={action} />}
+      {!melee && !defeated && <ViewRig action={action} />}
     </>
   );
 }
