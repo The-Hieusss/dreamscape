@@ -37,7 +37,7 @@ export default function SelectableObject({
       return;
     const label = `${object.type} ${object.modelPath.split("/").pop()}`;
     if (
-      /\b(path|road|pavement|sidewalk|crosswalk|grass|flower|hay|decal|cloud|star)\b/i.test(
+      /\b(paths?|roads?|pavement|sidewalks?|crosswalks?|grass|groundcover|flowers?|plants?|bush(es)?|ferns?|clover|mushrooms?|pebbles?|hay|decals?|clouds?|stars?)\b/i.test(
         label,
       )
     )
@@ -61,7 +61,18 @@ export default function SelectableObject({
       matrix.multiplyMatrices(inverseYaw, child.matrixWorld);
       box.union(meshBox.copy(child.geometry.boundingBox).applyMatrix4(matrix));
     });
-    if (box.isEmpty() || box.max.y - box.min.y <= 0.2) return;
+    if (box.isEmpty()) return;
+    const { x: width, y: height, z: depth } = box.getSize(new THREE.Vector3());
+    // Thin walls and tree trunks can still block movement. Loose props need
+    // enough height and footprint to act as an obstacle at their placed scale.
+    const structure =
+      /building|house|barn|silo|coop|windmill|mill|tower|fence|wall|tree|inn|stable|barracks|blacksmith|gazebo|skyscraper/i.test(
+        label,
+      );
+    if (
+      height < 0.65 || (!structure && Math.max(width, depth) < 0.75)
+    )
+      return;
     collisions.set(root, {
       yaw,
       minX: box.min.x,

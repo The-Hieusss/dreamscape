@@ -90,6 +90,18 @@
     "thumbnail": "/model-thumbnails/703d20f529f7bc46763c.webp"
   },
   {
+    "path": "/models/Characters/Soldier.glb",
+    "category": "Characters",
+    "name": "Soldier",
+    "thumbnail": "/model-thumbnails/8df8a98f513dd2236789.webp"
+  },
+  {
+    "path": "/models/Characters/SWAT.glb",
+    "category": "Characters",
+    "name": "SWAT",
+    "thumbnail": "/model-thumbnails/a835107bac833eb916c4.webp"
+  },
+  {
     "path": "/models/City/City Builder Bits/Base.glb",
     "category": "City · Streetscape",
     "name": "Base",
@@ -1606,5 +1618,17 @@
     "category": "Trees",
     "name": "Tree",
     "thumbnail": "/model-thumbnails/38374eabf17b0662e081.webp"
+  },
+  {
+    "path": "/models/Weapons/AssaultRifle.glb",
+    "category": "Weapons",
+    "name": "AssaultRifle",
+    "thumbnail": "/model-thumbnails/a6b90047927c65d0026b.webp"
+  },
+  {
+    "path": "/models/Weapons/Pistol.glb",
+    "category": "Weapons",
+    "name": "Pistol",
+    "thumbnail": "/model-thumbnails/4622ab2909aa0f4e88b7.webp"
   }
 ]

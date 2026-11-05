@@ -30,10 +30,14 @@ export type PlayerPose = {
 export default function FirstPersonController({
   theme,
   sharedSlot,
+  roundKey,
+  movementDisabled,
   onPose,
 }: {
   theme?: WorldTheme;
   sharedSlot?: number;
+  roundKey?: string;
+  movementDisabled?: boolean;
   onPose?: (pose: PlayerPose) => void;
 }) {
   const { camera, gl } = useThree();
@@ -57,10 +61,14 @@ export default function FirstPersonController({
     pitch.current = 0;
     keys.current.clear();
     camera.rotation.set(0, start.yaw, 0, "YXZ");
-  }, [camera, theme, sharedSlot]);
+  }, [camera, theme, sharedSlot, roundKey]);
 
   useEffect(() => {
     const canvas = gl.domElement;
+    if (movementDisabled) {
+      canvas.blur();
+      return;
+    }
     const previousTabIndex = canvas.getAttribute("tabindex");
     canvas.tabIndex = 0;
     const reset = () => {
@@ -155,10 +163,10 @@ export default function FirstPersonController({
       if (previousTabIndex === null) canvas.removeAttribute("tabindex");
       else canvas.setAttribute("tabindex", previousTabIndex);
     };
-  }, [gl]);
+  }, [gl, movementDisabled]);
 
   useFrame((_, delta) => {
-    if (camera.name !== "roaming-camera") return;
+    if (camera.name !== "roaming-camera" || movementDisabled) return;
     camera.rotation.set(pitch.current, yaw.current, 0, "YXZ");
     const active =
       !document.hidden &&

@@ -18,6 +18,16 @@ export interface SavedWorld {
 
 const fields = "id,name,scene,revision,updated_at";
 const paths = new Set(models.map(({ path }) => path));
+const renamedPaths = new Map([
+  [
+    "/models/Characters/SWAT by Quaternius - Btfn3G5Xv4.glb",
+    "/models/Characters/SWAT.glb",
+  ],
+  [
+    "/models/Characters/Soldier by Quaternius - oAArCNHjFB.glb",
+    "/models/Characters/Soldier.glb",
+  ],
+]);
 const themes = new Set([
   "universe",
   "forest",
@@ -40,12 +50,13 @@ export function readSnapshot(value: unknown): SceneSnapshot {
   }
   return {
     ...snapshot,
-    objects: snapshot.objects.filter(
-      (object) =>
-        object &&
-        typeof object.type === "string" &&
-        (!object.modelPath || paths.has(object.modelPath)),
-    ),
+    objects: snapshot.objects.flatMap((object) => {
+      if (!object || typeof object.type !== "string") return [];
+      if (!object.modelPath) return [object];
+      const renamed = renamedPaths.get(object.modelPath);
+      if (renamed) return [{ ...object, modelPath: renamed }];
+      return paths.has(object.modelPath) ? [object] : [];
+    }),
   };
 }
 

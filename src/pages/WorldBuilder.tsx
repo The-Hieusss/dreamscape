@@ -1,3 +1,6 @@
+import PracticeRange, {
+  initialRangeStats,
+} from "../components/fps/PracticeRange";
 import {
   Link,
   Navigate,
@@ -124,6 +127,18 @@ function WorldEditor({
     snap: false,
   });
   const [roaming, setRoaming] = useState(false);
+  const [practice, setPractice] = useState(false);
+  const [targetMode, setTargetMode] = useState<"balls" | "characters">("balls");
+  const [rangeRound, setRangeRound] = useState(0);
+  const [rangeStats, setRangeStats] = useState(initialRangeStats);
+  const [hitMarker, setHitMarker] = useState(0);
+  const hitTimer = useRef<number | undefined>(undefined);
+  const markHit = useCallback(() => {
+    setHitMarker(1);
+    window.clearTimeout(hitTimer.current);
+    hitTimer.current = window.setTimeout(() => setHitMarker(0), 140);
+  }, []);
+  useEffect(() => () => window.clearTimeout(hitTimer.current), []);
   const [objects, setObjects] = useState<SceneObject[]>(
     worldId ? [] : (draft?.scene.objects ?? []),
   );
@@ -472,6 +487,12 @@ function WorldEditor({
     <div className="relative w-screen h-screen md:h-screen overflow-hidden">
       <SceneManager
         roaming={roaming}
+        roundKey={practice ? `${targetMode}:${rangeRound}` : undefined}
+        deathAvatar={
+          practice && !rangeStats.health
+            ? "/models/Characters/Soldier.glb"
+            : undefined
+        }
         objects={objects}
         world={world}
         onAddObject={addObject}
@@ -481,7 +502,82 @@ function WorldEditor({
         onRotate={rotateObject}
         movementRef={movementRef}
         onMove={moveSelected}
-      />
+      >
+        {practice && (
+          <PracticeRange
+            key={`${targetMode}:${rangeRound}`}
+            targetMode={targetMode}
+            defeated={!rangeStats.health}
+            theme={world?.theme}
+            onStats={setRangeStats}
+            onHit={markHit}
+          />
+        )}
+      </SceneManager>
+      {practice && (
+        <>
+          {!!rangeStats.health && (
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 text-2xl leading-none ${hitMarker ? "text-amber-400" : "text-white"}`}
+            >
+              {hitMarker ? "×" : "+"}
+            </div>
+          )}
+          <section
+            className="absolute bottom-5 left-5 z-20 space-y-1 rounded-xl bg-slate-950/90 px-4 py-3 text-sm text-white"
+            aria-label="Target practice"
+          >
+            <p className="font-semibold">
+              {!rangeStats.health
+                ? "You were defeated"
+                : rangeStats.targets
+                  ? "Target practice"
+                  : "Range clear"}
+            </p>
+            <p>
+              {rangeStats.reloading
+                ? "Reloading…"
+                : `Ammo ${rangeStats.ammo} / 30`}{" "}
+              · Targets left {rangeStats.targets}
+            </p>
+            {targetMode === "characters" && (
+              <p>Health {rangeStats.health} / 100</p>
+            )}
+            <label className="flex items-center gap-2">
+              Targets
+              <select
+                value={targetMode}
+                className="rounded bg-slate-700 px-2 py-1"
+                onChange={(event) => {
+                  setRangeStats(initialRangeStats);
+                  setTargetMode(
+                    event.target.value === "characters"
+                      ? "characters"
+                      : "balls",
+                  );
+                }}
+              >
+                <option value="balls">Balls</option>
+                <option value="characters">Soldiers and SWAT</option>
+              </select>
+            </label>
+            <p>
+              Hits {rangeStats.hits} / {rangeStats.shots} shots
+            </p>
+            <button
+              type="button"
+              className="underline"
+              onClick={() => {
+                setRangeStats(initialRangeStats);
+                setRangeRound((round) => round + 1);
+              }}
+            >
+              Restart round
+            </button>
+          </section>
+        </>
+      )}
 
       {!roaming && (
         <>
@@ -599,12 +695,28 @@ function WorldEditor({
           onClick={() => {
             setSelectedId(null);
             setRotationTool((tool) => ({ ...tool, enabled: false }));
+            setPractice(false);
             setRoaming((value) => !value);
           }}
           className="whitespace-nowrap rounded-lg bg-indigo-500 px-3 py-2 text-sm font-medium hover:bg-indigo-400"
         >
           {roaming ? "Back to build" : "Explore on foot"}
         </button>
+        {!roaming && (
+          <button
+            type="button"
+            className="ml-2 rounded-lg bg-slate-700 px-3 py-2 text-sm hover:bg-slate-600"
+            onClick={() => {
+              setSelectedId(null);
+              setRotationTool((tool) => ({ ...tool, enabled: false }));
+              setRangeStats(initialRangeStats);
+              setPractice(true);
+              setRoaming(true);
+            }}
+          >
+            Target practice
+          </button>
+        )}
         {!roaming && (
           <details className="mt-2 text-sm">
             <summary className="cursor-pointer">World</summary>
@@ -686,7 +798,10 @@ function WorldEditor({
         {roaming && (
           <p className="mt-2 max-w-sm text-xs text-white/75">
             Click the scene to start. WASD / arrows: walk · Shift: faster ·
-            Mouse: look · Esc: pause. Drag to look if mouse lock is unavailable.
+            Mouse: look · Esc: pause.{" "}
+            {practice
+              ? "Left click or hold to fire · R: reload."
+              : "Drag to look if mouse lock is unavailable."}
           </p>
         )}
       </div>

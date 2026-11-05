@@ -1,3 +1,7 @@
+import CoopRange from "../components/fps/CoopRange";
+import type { CoopTransport } from "../components/fps/CoopRange";
+import { validCombatCommand, validCombatSnapshot } from "../lib/coopCombat";
+import type { CombatSnapshot, Slot } from "../lib/coopCombat";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
@@ -18,7 +22,7 @@ import { modelAnimations } from "../lib/modelAnimations";
 
 interface Room {
   id: string;
-  slot: number;
+  slot: Slot;
   name: string;
   scene: SceneSnapshot;
   expiresAt: string;
@@ -44,7 +48,7 @@ function RemoteAvatar({
   slot,
 }: {
   pose: RefObject<PlayerPose | null>;
-  motion: PlayerPose["motion"];
+  motion: PlayerPose["motion"] | "Death";
   slot: number;
 }) {
   const group = useRef<Group>(null);
@@ -93,6 +97,32 @@ function RoomScene({ room }: { room: Room }) {
   const [expired, setExpired] = useState(false);
   const localPose = useRef<PlayerPose | null>(null);
   const remotePose = useRef<PlayerPose | null>(null);
+  const remoteAt = useRef(-Infinity);
+  const connectedRef = useRef(false);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const [round, setRound] = useState<string | null>(null);
+  const [combat, setCombat] = useState<CombatSnapshot | null>(null);
+  const [hostPaused, setHostPaused] = useState(false);
+  const transport = useMemo<CoopTransport>(
+    () => ({
+      ready: () =>
+        connectedRef.current &&
+        localPose.current !== null &&
+        remotePose.current !== null &&
+        performance.now() - remoteAt.current < 1500,
+      pose: (slot) =>
+        slot === room.slot ? localPose.current : remotePose.current,
+      send: (event, payload) => {
+        if (connectedRef.current)
+          void channelRef.current?.send({ type: "broadcast", event, payload });
+      },
+      incoming: null,
+      snapshot: null,
+      receivedAt: -Infinity,
+    }),
+    [room.slot],
+  );
+
   const movementRef = useRef<
     ((direction: MoveDirection, distance: number) => void) | null
   >(null);
@@ -120,11 +150,23 @@ function RoomScene({ room }: { room: Room }) {
     let connected = false;
     let channel: RealtimeChannel | undefined;
     const expiresIn = Math.max(0, Date.parse(room.expiresAt) - Date.now());
-    const expiry = window.setTimeout(() => {
+    const closeRoom = () => {
       setExpired(true);
       connected = false;
+      connectedRef.current = false;
       if (channel) void supabase.removeChannel(channel);
-    }, expiresIn);
+    };
+    const expiry = window.setTimeout(closeRoom, expiresIn);
+    // A channel can retain its authorization after the room row is deleted.
+    const roomCheck = window.setInterval(async () => {
+      if (!live || !connected) return;
+      const { data, error } = await supabase
+        .from("exploration_rooms")
+        .select("id")
+        .eq("id", room.id)
+        .maybeSingle();
+      if (live && !error && !data) closeRoom();
+    }, 10_000);
     const presenceKey = crypto.randomUUID();
     const begin = async () => {
       await supabase.realtime.setAuth();
@@ -133,6 +175,7 @@ function RoomScene({ room }: { room: Room }) {
         config: { private: true, presence: { key: presenceKey } },
       });
       const current = channel;
+      channelRef.current = current;
       current
         .on("presence", { event: "sync" }, () => {
           if (!live) return;
@@ -155,12 +198,24 @@ function RoomScene({ room }: { room: Room }) {
           )
             return;
           remotePose.current = payload.pose;
+          remoteAt.current = performance.now();
           setMotion(payload.pose.motion);
           setHasPose(true);
+        })
+        .on("broadcast", { event: "combat-state" }, ({ payload }) => {
+          if (!live || room.slot !== 1 || !validCombatSnapshot(payload)) return;
+          transport.snapshot = payload;
+          transport.receivedAt = performance.now();
+          setRound(payload.round);
+        })
+        .on("broadcast", { event: "combat-command" }, ({ payload }) => {
+          if (live && room.slot === 0 && validCombatCommand(payload))
+            transport.incoming = payload;
         })
         .subscribe(async (state) => {
           if (!live) return;
           connected = state === "SUBSCRIBED";
+          connectedRef.current = connected;
           setStatus(connected ? "Connected" : "Reconnecting…");
           if (connected) await current.track({ slot: room.slot });
           else {
@@ -174,6 +229,10 @@ function RoomScene({ room }: { room: Room }) {
       if (live) setStatus("Connection unavailable. Reload to retry.");
     });
     const sender = window.setInterval(() => {
+      setHostPaused(
+        !transport.ready() ||
+          (room.slot === 1 && performance.now() - transport.receivedAt >= 1500),
+      );
       if (connected && localPose.current)
         void channel?.send({
           type: "broadcast",
@@ -183,16 +242,26 @@ function RoomScene({ room }: { room: Room }) {
     }, 100);
     return () => {
       live = false;
+      connectedRef.current = false;
+      channelRef.current = null;
       clearInterval(sender);
+      clearInterval(roomCheck);
       clearTimeout(expiry);
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [room]);
+  }, [room, transport]);
+
+  const currentCombat = combat?.round === round ? combat : null;
+  const player = currentCombat?.players[room.slot];
+  const teammate = currentCombat?.players[1 - room.slot];
+  const remaining = currentCombat?.enemies.filter(
+    (enemy) => enemy.hp > 0,
+  ).length;
 
   if (expired)
     return (
       <main className="p-8">
-        <p>This room has expired.</p>
+        <p>This room is no longer available.</p>
         <Link to="/my-worlds">My worlds</Link>
       </main>
     );
@@ -201,6 +270,14 @@ function RoomScene({ room }: { room: Room }) {
       <SceneManager
         roaming
         sharedSlot={room.slot}
+        roundKey={round ?? undefined}
+        deathAvatar={
+          player?.health === 0
+            ? room.slot === 0
+              ? "/models/Characters/Knight.glb"
+              : "/models/Characters/Farmer.glb"
+            : undefined
+        }
         onPose={(pose) => {
           localPose.current = pose;
         }}
@@ -214,14 +291,37 @@ function RoomScene({ room }: { room: Room }) {
         rotationTool={rotationTool}
         onRotate={noop}
       >
+        {round && (
+          <CoopRange
+            key={round}
+            round={round}
+            slot={room.slot}
+            theme={world?.theme}
+            transport={transport}
+            onState={setCombat}
+          />
+        )}
         {peerOnline && hasPose && (
           <RemoteAvatar
             pose={remotePose}
-            motion={motion}
+            motion={
+              combat?.round === round &&
+              combat?.players[1 - room.slot].health === 0
+                ? "Death"
+                : motion
+            }
             slot={1 - room.slot}
           />
         )}
       </SceneManager>
+      {round && player?.health !== 0 && (
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-white"
+          aria-hidden="true"
+        >
+          +
+        </div>
+      )}
       <section className="absolute left-3 top-3 max-w-xs space-y-2 rounded-xl bg-slate-950/90 p-4 text-sm text-white">
         <h1 className="font-semibold">{room.name}</h1>
         <p role="status">
@@ -231,6 +331,51 @@ function RoomScene({ room }: { room: Room }) {
           Click the scene and use WASD or arrows to walk. Press Esc to release
           the mouse.
         </p>
+        {round && (
+          <div className="space-y-1 border-t border-white/20 pt-2">
+            <h2 className="font-semibold">Co-op combat</h2>
+            {remaining === 0 ? (
+              <p>Round cleared</p>
+            ) : player?.health === 0 && teammate?.health === 0 ? (
+              <p>Team defeated</p>
+            ) : hostPaused ? (
+              <p>Paused · waiting for {room.slot === 0 ? "guest" : "host"}</p>
+            ) : currentCombat && currentCombat.startsIn > 0 ? (
+              <p>Combat starts in {currentCombat.startsIn}…</p>
+            ) : null}
+            {player && teammate && (
+              <p>
+                Health {player.health} · Teammate {teammate.health} · Enemies{" "}
+                {remaining}
+              </p>
+            )}
+            {player && (
+              <p>
+                {player.reloading ? "Reloading…" : `Ammo ${player.ammo} / 30`} ·
+                Hits {player.hits} / {player.shots}
+              </p>
+            )}
+            {player?.health === 0 && teammate && teammate.health > 0 ? (
+              <p>You’re down. Your teammate can finish the round.</p>
+            ) : (
+              <p>Left click to fire · R to reload</p>
+            )}
+          </div>
+        )}
+        {room.slot === 0 && (
+          <button
+            type="button"
+            disabled={!peerOnline || !hasPose}
+            className="block rounded bg-indigo-600 px-3 py-1 disabled:opacity-50"
+            onClick={() => {
+              transport.incoming = null;
+              setCombat(null);
+              setRound(crypto.randomUUID());
+            }}
+          >
+            {round ? "Restart combat round" : "Start co-op combat"}
+          </button>
+        )}
         {room.slot === 0 && (
           <label className="block">
             Invite link

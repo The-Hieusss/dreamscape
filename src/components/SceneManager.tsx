@@ -1,3 +1,4 @@
+import DeathView from "./fps/DeathView";
 import { CollisionContext } from "../lib/collisionContext";
 import { CollisionMap } from "../lib/collisions";
 import type { ReactNode } from "react";
@@ -40,11 +41,15 @@ function SceneContent({
   onRotate,
   roaming,
   sharedSlot,
+  roundKey,
+  deathAvatar,
   onPose,
   children,
 }: {
   roaming: boolean;
   sharedSlot?: number;
+  roundKey?: string;
+  deathAvatar?: string;
   onPose?: (pose: PlayerPose) => void;
   children?: ReactNode;
   objects: SceneObject[];
@@ -234,6 +239,8 @@ function SceneContent({
           <FirstPersonController
             theme={world?.theme}
             sharedSlot={sharedSlot}
+            roundKey={roundKey}
+            movementDisabled={!!deathAvatar}
             onPose={onPose}
           />
         </>
@@ -284,6 +291,7 @@ function SceneContent({
               }
             />
           ))}
+        {roaming && deathAvatar && <DeathView avatar={deathAvatar} />}
         {children}
       </Suspense>
       {!roaming && (
@@ -312,6 +320,8 @@ function SceneContent({
 export default function SceneManager(props: {
   roaming: boolean;
   sharedSlot?: number;
+  roundKey?: string;
+  deathAvatar?: string;
   onPose?: (pose: PlayerPose) => void;
   children?: ReactNode;
   objects: SceneObject[];
