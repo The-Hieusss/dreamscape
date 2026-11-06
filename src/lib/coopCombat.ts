@@ -24,6 +24,9 @@ export type CombatCommand =
   | { round: string; kind: "reload" | "slash" }
   | { round: string; kind: "fire"; direction: [number, number, number] };
 
+export const REX_HEALTH = 10;
+export const rexClips = ["Idle", "Walk", "Run", "Attack", "Death"] as const;
+
 const clips = new Set([
   "",
   "Idle",
@@ -35,6 +38,7 @@ const clips = new Set([
   "Death",
   "Idle_Sword",
   "Sword_Slash",
+  ...rexClips.map((clip) => `TRex_${clip}`),
 ]);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === "object";
@@ -81,7 +85,7 @@ export function validCombatSnapshot(value: unknown): value is CombatSnapshot {
       (e) =>
         isRecord(e) &&
         integer(e.id, 3) &&
-        integer(e.hp, 3) &&
+        integer(e.hp, REX_HEALTH) &&
         isRecord(e.pose) &&
         [e.pose.x, e.pose.y, e.pose.z, e.pose.yaw].every(
           (n) =>

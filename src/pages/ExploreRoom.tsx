@@ -289,6 +289,7 @@ function RoomScene({ room }: { room: Room }) {
     };
   }, [room, transport]);
 
+  const hunt = world?.theme === "hunt";
   const villageMelee = world?.theme === "village";
   const currentCombat = combat?.round === round ? combat : null;
   const player = currentCombat?.players[room.slot];
@@ -308,7 +309,7 @@ function RoomScene({ room }: { room: Room }) {
     <main className="relative h-dvh w-screen overflow-hidden">
       <SceneManager
         roaming
-        combatMode={!!round}
+        combatMode={!!round || hunt}
         explorationView={explorationView}
         sharedSlot={room.slot}
         roundKey={round ?? undefined}
@@ -374,7 +375,7 @@ function RoomScene({ room }: { room: Room }) {
           Click the scene and use WASD or arrows to walk. Press Esc to release
           the mouse.
         </p>
-        {!round && (
+        {!round && !hunt && (
           <CameraViewToggle
             view={explorationView}
             onChange={setExplorationView}
@@ -382,20 +383,24 @@ function RoomScene({ room }: { room: Room }) {
         )}
         {round && (
           <div className="space-y-1 border-t border-white/20 pt-2">
-            <h2 className="font-semibold">Co-op combat</h2>
+            <h2 className="font-semibold">
+              {hunt ? "Co-op T. rex hunt" : "Co-op combat"}
+            </h2>
             {remaining === 0 ? (
-              <p>Round cleared</p>
+              <p>{hunt ? "Hunt complete" : "Round cleared"}</p>
             ) : player?.health === 0 && teammate?.health === 0 ? (
               <p>Team defeated</p>
             ) : hostPaused ? (
               <p>Paused · waiting for {room.slot === 0 ? "guest" : "host"}</p>
             ) : currentCombat && currentCombat.startsIn > 0 ? (
-              <p>Combat starts in {currentCombat.startsIn}…</p>
+              <p>
+                {hunt ? "Hunt" : "Combat"} starts in {currentCombat.startsIn}…
+              </p>
             ) : null}
             {player && teammate && (
               <p>
-                Health {player.health} · Teammate {teammate.health} · Enemies{" "}
-                {remaining}
+                Health {player.health} · Teammate {teammate.health} ·{" "}
+                {hunt ? "T. rexes left" : "Enemies"} {remaining}
               </p>
             )}
             {player && (
@@ -408,12 +413,16 @@ function RoomScene({ room }: { room: Room }) {
               </p>
             )}
             {player?.health === 0 && teammate && teammate.health > 0 ? (
-              <p>You’re down. Your teammate can finish the round.</p>
+              <p>
+                You’re down. Your teammate can finish the{" "}
+                {hunt ? "hunt" : "round"}.
+              </p>
             ) : (
               <p>
                 {villageMelee
                   ? "Left click to swing your sword. Get close to land a hit."
                   : "Left click to fire · R to reload"}
+                {hunt && " · Wounded T. rexes charge. One bite is fatal."}
               </p>
             )}
           </div>
@@ -429,7 +438,13 @@ function RoomScene({ room }: { room: Room }) {
               setRound(crypto.randomUUID());
             }}
           >
-            {round ? "Restart combat round" : "Start co-op combat"}
+            {hunt
+              ? round
+                ? "Restart hunt"
+                : "Start co-op hunt"
+              : round
+                ? "Restart combat round"
+                : "Start co-op combat"}
           </button>
         )}
         {room.slot === 0 && (

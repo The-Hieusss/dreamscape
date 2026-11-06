@@ -9,9 +9,10 @@ import { EYE_HEIGHT } from "../../lib/roaming";
 import { worldBounds } from "../../lib/wandering";
 import { shotBlockers } from "./Combatant";
 
-export const REX_HEALTH = 10;
+import { REX_HEALTH, rexClips } from "../../lib/coopCombat";
+import type { EnemyPose, Slot } from "../../lib/coopCombat";
 const BITE_REACH = 6.3;
-type Clip = "Idle" | "Walk" | "Run" | "Attack" | "Death";
+type Clip = (typeof rexClips)[number];
 
 export default function HuntRex({
   id,
@@ -19,15 +20,26 @@ export default function HuntRex({
   hp,
   active,
   onBite,
+  choosePlayer,
+  reportPose,
+  replica,
 }: {
   id: number;
   spawn: [number, number, number];
   hp: number;
   active: () => boolean;
-  onBite: () => void;
+  onBite: (slot?: Slot) => void;
+  choosePlayer?: (
+    from: Vector3,
+    slot?: Slot,
+  ) => { slot: Slot; eye: Vector3 } | undefined;
+  reportPose?: (pose: EnemyPose) => void;
+  replica?: EnemyPose;
 }) {
   const { camera, scene } = useThree();
   const collisions = useContext(CollisionContext);
+  const initialSpawn = useRef(spawn);
+  const biteTarget = useRef<Slot | undefined>(undefined);
   const body = useRef<Group>(null);
   const [motion, setMotion] = useState<Clip>("Walk");
   const destination = useRef<Point>({ x: spawn[0] + 10, z: spawn[2] - 12 });
@@ -39,10 +51,39 @@ export default function HuntRex({
   const bounds = worldBounds("hunt");
 
   useFrame((_, delta) => {
-    if (!body.current || hp <= 0 || !active()) return;
+    if (!body.current) return;
     const dt = Math.min(0.05, delta);
     const position = body.current.position;
-    const player = camera.position;
+    if (replica) {
+      const blend = 1 - Math.exp(-14 * dt);
+      position.x += (replica.x - position.x) * blend;
+      position.y += (replica.y - position.y) * blend;
+      position.z += (replica.z - position.z) * blend;
+      const turn = replica.yaw - body.current.rotation.y;
+      body.current.rotation.y +=
+        Math.atan2(Math.sin(turn), Math.cos(turn)) * blend;
+      const clip = rexClips.find((value) => replica.clip === `TRex_${value}`);
+      if (clip && motion !== clip) setMotion(clip);
+      return;
+    }
+    reportPose?.({
+      x: position.x,
+      y: position.y,
+      z: position.z,
+      yaw: body.current.rotation.y,
+      clip: `TRex_${hp <= 0 ? "Death" : motion}`,
+      armed: false,
+    });
+    if (hp <= 0 || !active()) return;
+    const target = choosePlayer?.(
+      position,
+      bite.current > 0 ? biteTarget.current : undefined,
+    );
+    const player = choosePlayer ? target?.eye : camera.position;
+    if (!player) {
+      bite.current = 0;
+      return;
+    }
     const charging = hp < REX_HEALTH;
     if (charging && !aggro.current) {
       aggro.current = true;
@@ -50,6 +91,7 @@ export default function HuntRex({
     }
     const dx = player.x - position.x,
       dz = player.z - position.z;
+    const playerY = player.y;
     const distance = Math.hypot(dx, dz);
     const near =
       distance <= BITE_REACH &&
@@ -63,7 +105,7 @@ export default function HuntRex({
     }
     function clearBite() {
       const origin = new Vector3(position.x, position.y + 2.2, position.z);
-      const direction = player.clone().sub(origin);
+      const direction = new Vector3(dx, playerY - origin.y, dz);
       ray.current.set(origin, direction.clone().normalize());
       ray.current.far = Math.max(0, direction.length() - 0.15);
       return (
@@ -77,12 +119,13 @@ export default function HuntRex({
       bite.current = Math.max(0, bite.current - dt);
       // Give the player the windup to dodge or get behind cover.
       if (previous > 0.61 && bite.current <= 0.61 && near && clearBite())
-        onBite();
+        onBite(target?.slot);
       return;
     }
     if (charging && near && clearBite() && motion !== "Attack") {
       face(dx, dz);
       bite.current = 1.17;
+      biteTarget.current = target?.slot;
       setMotion("Attack");
       return;
     }
@@ -97,8 +140,8 @@ export default function HuntRex({
     ) {
       const angle = Math.random() * Math.PI * 2;
       destination.current = {
-        x: spawn[0] + Math.cos(angle) * 20,
-        z: spawn[2] + Math.sin(angle) * 20,
+        x: initialSpawn.current[0] + Math.cos(angle) * 20,
+        z: initialSpawn.current[2] + Math.sin(angle) * 20,
       };
       replan.current = 0;
     }
@@ -145,8 +188,8 @@ export default function HuntRex({
       }
       if (!charging && !route.current.length) {
         destination.current = {
-          x: spawn[0] + (Math.random() - 0.5) * 35,
-          z: spawn[2] + (Math.random() - 0.5) * 35,
+          x: initialSpawn.current[0] + (Math.random() - 0.5) * 35,
+          z: initialSpawn.current[2] + (Math.random() - 0.5) * 35,
         };
       }
       replan.current = charging ? 0.65 : 2;
@@ -175,7 +218,7 @@ export default function HuntRex({
 
   const clip = hp <= 0 ? "Death" : motion;
   return (
-    <group ref={body} position={spawn}>
+    <group ref={body} position={initialSpawn.current}>
       <AnimatedModel
         path="/models/Animals/T-Rex.glb"
         scale={[0.52, 0.52, 0.52]}

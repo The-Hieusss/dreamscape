@@ -132,6 +132,7 @@ function WorldEditor({
   const [recoveredCopy, setRecoveredCopy] = useState(false);
   const [staleDraft, setStaleDraft] = useState(false);
   const saveLock = useRef(false);
+  const pendingHunt = useRef<SavedWorld | null>(null);
 
   const movementRef = useRef<
     ((direction: MoveDirection, distance: number) => void) | null
@@ -240,19 +241,31 @@ function WorldEditor({
     objects,
   ]);
 
-  async function persist(explore: boolean) {
-    if (saveLock.current || !name.trim()) return;
+  async function persist(explore: boolean, hunt = false) {
+    if (saveLock.current || (!hunt && !name.trim())) return;
     saveLock.current = true;
     setBusy(true);
     setSaveError("");
     try {
-      const record = await saveWorld(
-        name.trim(),
-        sceneSnapshot,
-        recoveredCopy ? null : saved,
-      );
-      setSaved(record);
-      if (recoveredCopy) setRecoveredCopy(false);
+      const { objects: huntObjects, ...huntSettings } = huntWorld;
+      const record = hunt
+        ? (pendingHunt.current ??
+          (await saveWorld(
+            huntSettings.name,
+            { schemaVersion: 1, settings: huntSettings, objects: huntObjects },
+            null,
+          )))
+        : await saveWorld(
+            name.trim(),
+            sceneSnapshot,
+            recoveredCopy ? null : saved,
+          );
+      if (hunt) {
+        pendingHunt.current = record;
+      } else {
+        setSaved(record);
+        if (recoveredCopy) setRecoveredCopy(false);
+      }
       if (explore) {
         const { data, error } = await supabase
           .from("exploration_rooms")
@@ -260,6 +273,7 @@ function WorldEditor({
           .select("id")
           .single();
         if (error) throw new Error(error.message);
+        if (hunt) pendingHunt.current = null;
         navigate(`/explore/${data.id}`);
       } else if (record.id !== worldId) {
         navigate(`/world-builder/${record.id}`, { replace: true });
@@ -818,6 +832,14 @@ function WorldEditor({
                   >
                     <Users aria-hidden="true" size={16} /> Save and explore
                     together
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-2.5 hover:bg-emerald-400/20 disabled:opacity-45"
+                    disabled={busy}
+                    onClick={() => void persist(true, true)}
+                  >
+                    <Users aria-hidden="true" size={16} /> Co-op T. rex hunt
                   </button>
                 </>
               ) : (

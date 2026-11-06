@@ -36,6 +36,7 @@ const themes = new Set([
   "desert",
   "woodland",
   "village",
+  "hunt",
 ]);
 
 export function readSnapshot(value: unknown): SceneSnapshot {

@@ -14,6 +14,9 @@ import type {
 } from "../../lib/coopCombat";
 import type { WorldTheme } from "../../lib/types";
 import type { PlayerPose } from "../roaming/FirstPersonController";
+import HuntRex from "./HuntRex";
+import { huntSpawns } from "../../lib/huntTerrain";
+import { REX_HEALTH } from "../../lib/coopCombat";
 import Combatant, { shotBlockers } from "./Combatant";
 import { ViewRig } from "./PracticeRange";
 import type { RigClip } from "./PracticeRange";
@@ -55,6 +58,7 @@ export default function CoopRange({
   onState: (state: CombatSnapshot) => void;
 }) {
   const { gl, scene, camera } = useThree();
+  const hunt = theme === "hunt";
   const melee = theme === "village";
   const playerView = useContext(PlayerView);
   const collisions = useContext(CollisionContext);
@@ -87,8 +91,21 @@ export default function CoopRange({
   useEffect(() => {
     if (slot !== 0) return;
     const start = roamStart(theme);
-    const enemies: CombatSnapshot["enemies"] = [];
-    for (const distance of [12, 17, 24, 32]) {
+    const enemies: CombatSnapshot["enemies"] = hunt
+      ? huntSpawns.map(({ x, z }, id) => ({
+          id,
+          hp: REX_HEALTH,
+          pose: {
+            x,
+            y: getTerrainHeight(x, z, theme),
+            z,
+            yaw: 0,
+            clip: "TRex_Walk",
+            armed: false,
+          },
+        }))
+      : [];
+    for (const distance of hunt ? [] : [12, 17, 24, 32]) {
       for (const side of [-4, 0, 4, -8, 8]) {
         if (enemies.length >= 4) break;
         const x =
@@ -106,7 +123,7 @@ export default function CoopRange({
       }
     }
     host.current.enemies = enemies;
-  }, [collisions, slot, theme]);
+  }, [collisions, hunt, slot, theme]);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -167,6 +184,12 @@ export default function CoopRange({
   function display(snapshot: CombatSnapshot) {
     const previous = lastRendered.current?.players[slot];
     const player = snapshot.players[slot];
+    if (
+      player.health === 0 &&
+      previous?.health !== 0 &&
+      document.pointerLockElement === gl.domElement
+    )
+      document.exitPointerLock();
     const clip =
       player.reloading && !previous?.reloading
         ? "Reload"
@@ -274,7 +297,8 @@ export default function CoopRange({
         if (command.kind === "slash") {
           hitId = swordHit(pose, targetGroup.current, blockers, alive);
         } else if (command.kind === "fire") {
-          ray.current.far = 80;
+          ray.current.far = hunt ? 160 : 80;
+          targetGroup.current.updateWorldMatrix(true, true);
           ray.current.set(
             origin.current.set(pose.x, pose.y + EYE_HEIGHT, pose.z),
             direction.current.fromArray(command.direction).normalize(),
@@ -302,10 +326,11 @@ export default function CoopRange({
     }
   });
 
-  function choosePlayer(from: THREE.Vector3) {
+  function choosePlayer(from: THREE.Vector3, targetSlot?: Slot) {
     let choice: { slot: Slot; eye: THREE.Vector3 } | undefined;
     let nearest = Infinity;
     for (const index of [0, 1] as const) {
+      if (targetSlot !== undefined && index !== targetSlot) continue;
       const pose = transport.pose(index);
       if (!pose || !host.current.players[index].health) continue;
       const distance = Math.hypot(pose.x - from.x, pose.z - from.z);
@@ -320,44 +345,56 @@ export default function CoopRange({
     return choice;
   }
 
+  function damagePlayer(damage: number, playerSlot?: Slot) {
+    if (playerSlot === undefined || !fighting()) return;
+    const player = host.current.players[playerSlot];
+    player.health = Math.max(0, player.health - damage);
+  }
+
   return (
     <>
       <group ref={targetGroup}>
-        {state?.enemies.map((enemy) => (
-          <Combatant
-            key={enemy.id}
-            id={enemy.id}
-            fighter={melee ? "knight" : enemy.id % 2 ? "swat" : "soldier"}
-            position={[enemy.pose.x, enemy.pose.y, enemy.pose.z]}
-            dead={!enemy.hp}
-            theme={theme}
-            active={fighting}
-            choosePlayer={slot === 0 ? choosePlayer : undefined}
-            reportPose={
+        {state?.enemies.map((enemy) => {
+          const position: [number, number, number] = [
+            enemy.pose.x,
+            enemy.pose.y,
+            enemy.pose.z,
+          ];
+          const sync = {
+            id: enemy.id,
+            active: fighting,
+            choosePlayer: slot === 0 ? choosePlayer : undefined,
+            reportPose:
               slot === 0
-                ? (pose) => {
+                ? (pose: CombatSnapshot["enemies"][number]["pose"]) => {
                     const current = host.current.enemies.find(
                       (item) => item.id === enemy.id,
                     );
                     if (current) current.pose = pose;
                   }
-                : undefined
-            }
-            replica={slot === 1 ? enemy.pose : undefined}
-            damagePlayer={(damage, playerSlot) => {
-              if (playerSlot !== undefined && fighting()) {
-                const player = host.current.players[playerSlot];
-                player.health = Math.max(0, player.health - damage);
-                if (
-                  playerSlot === slot &&
-                  !player.health &&
-                  document.pointerLockElement === gl.domElement
-                )
-                  document.exitPointerLock();
-              }
-            }}
-          />
-        ))}
+                : undefined,
+            replica: slot === 1 ? enemy.pose : undefined,
+          };
+          return hunt ? (
+            <HuntRex
+              key={enemy.id}
+              {...sync}
+              spawn={position}
+              hp={enemy.hp}
+              onBite={(playerSlot) => damagePlayer(100, playerSlot)}
+            />
+          ) : (
+            <Combatant
+              key={enemy.id}
+              {...sync}
+              fighter={melee ? "knight" : enemy.id % 2 ? "swat" : "soldier"}
+              position={position}
+              dead={!enemy.hp}
+              theme={theme}
+              damagePlayer={damagePlayer}
+            />
+          );
+        })}
       </group>
       {!melee && state?.players[slot].health !== 0 && (
         <ViewRig action={action} />

@@ -1,4 +1,5 @@
-import HuntRex, { REX_HEALTH } from "./HuntRex";
+import HuntRex from "./HuntRex";
+import { REX_HEALTH } from "../../lib/coopCombat";
 import { huntSpawns } from "../../lib/huntTerrain";
 import { PlayerView, SWORD_SWING_MS } from "../roaming/playerView";
 import { swordHit } from "./swordHit";
